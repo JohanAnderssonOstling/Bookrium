@@ -1,0 +1,30 @@
+[package]
+name = "cxx_layer"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+#cxx.workspace = "1.0.83"
+#cxx-qt.workspace = "0.5"
+#cxx-qt-lib.workspace = "0.5"
+cxx = "1.0.83"
+
+lazy_static = "1.4.0"
+tokio = "1.28.0"
+
+client_app = { path = "../../../client_app" }
+library_app = { path = "../../../library_app" }
+library_types = { path = "../../../library_types" }
+file_io = { path = "../../../file_io" }
+
+[build-dependencies]
+cxx-build = "1.0.83"
+
+[workspace]
+
+
+[lib]
+crate-type = ["staticlib"]

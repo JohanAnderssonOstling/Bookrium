@@ -1,0 +1,12 @@
+[package]
+name = "library_app"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+library_types = { path = "../library_types" }
+library_model = { path = "../library_model" }
+tokio = "1.27.0"
+file_parser = { path = "../file_parser" }
