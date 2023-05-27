@@ -1,16 +1,18 @@
 use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
+
 use iter_tools::{Either, Itertools};
 use lazy_static::lazy_static;
 
 lazy_static!(
-  static ref FILETYPES: HashSet<&'static str> = HashSet::from(["epub", "pdf"]);
+  static ref FILETYPES: HashSet<&'static str> =
+		HashSet::from(["epub", "pdf"]);
 );
 
 pub fn is_filetype(path: &PathBuf) -> bool {
 	let extension = path.extension().unwrap().to_str().unwrap();
-	FILETYPES.contains(extension) || path.is_dir()
+	path.is_dir() || FILETYPES.contains(extension)
 }
 
 pub fn scan_dir(path: PathBuf) -> (Vec<PathBuf>, Vec<PathBuf>) {
