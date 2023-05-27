@@ -38,7 +38,7 @@ impl LibraryApp {
     pub fn add_files(&mut self, uuid: &str, path: &str) -> Result<(), String> {
         let library_model = self.open_libraries.get(uuid)
             .ok_or("Library wasn't found")?;
-        RUNTIME.block_on(library_model.scan_library(path, uuid));
+        RUNTIME.block_on(library_model.scan_library(path));
 
         Ok(())
     }

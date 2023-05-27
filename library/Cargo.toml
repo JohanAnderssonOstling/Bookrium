@@ -12,3 +12,4 @@ file_io = { path = "../file_io"}
 tokio = { version = "1.27.0", features = ["full"] }
 async-recursion = "1.0.4"
 lazy_static = "1.4.0"
+log = "0.4.14"

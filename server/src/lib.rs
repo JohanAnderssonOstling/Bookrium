@@ -5,7 +5,7 @@ use std::process::Stdio;
 use file_io::file_io::*;
 /// Starts the server
 pub fn start_db_server() {
-    let db_path = CLIENT_DB_PATH.as_str();
+    let db_path = DB_PATH.as_str();
     println!("Starting server with db path: {}", db_path);
     let mut command = Command::new("surreal")
         .arg("start")

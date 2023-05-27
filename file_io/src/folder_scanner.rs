@@ -1,7 +1,5 @@
-
-
 use std::fs;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::path::PathBuf;
 use iter_tools::{Either, Itertools};
 use lazy_static::lazy_static;
@@ -12,18 +10,18 @@ lazy_static!(
 );
 
 pub struct ScannedDir {
-    pub path: PathBuf, pub dirs: Vec<PathBuf>, pub files: Vec<PathBuf>,
+    pub dirs: Vec<PathBuf>, pub files: Vec<PathBuf>,
 }
 
 impl ScannedDir {
-    pub fn new(path: PathBuf, dirs: Vec<PathBuf>, files: Vec<PathBuf>) -> Self {
-        ScannedDir { path, dirs, files, }
+    pub fn new(dirs: Vec<PathBuf>, files: Vec<PathBuf>) -> Self {
+        ScannedDir { dirs, files, }
     }
 }
 
 pub fn is_filetype(path: &PathBuf) -> bool {
     let extension = path.extension().unwrap().to_str().unwrap();
-    FILETYPES.contains(extension)
+    FILETYPES.contains(extension) || path.is_dir()
 }
 
 pub fn scan_dir(path: PathBuf) -> ScannedDir {
@@ -34,6 +32,6 @@ pub fn scan_dir(path: PathBuf) -> ScannedDir {
             if path.is_dir() { Either::Left(path) }
             else { Either::Right(path) }
         });
-    ScannedDir::new(path, dirs, files)
+    ScannedDir::new(dirs, files)
 }
 

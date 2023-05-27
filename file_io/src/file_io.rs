@@ -13,8 +13,7 @@ lazy_static! {
 
     pub static ref DATA_DIR: String = PROJECT_DIRS.data_dir().to_str().unwrap().to_string();
     pub static ref LIBRARY_DIR: String = format!("{}/libraries", DATA_DIR.as_str());
-    pub static ref CLIENT_DB_PATH: String =
-        format!("{}/client.db", PROJECT_DIRS.data_dir().to_str().unwrap());
+    pub static ref DB_PATH: String = format!("{}/client.db", DATA_DIR.as_str());
 }
 
 pub fn create_client_files() {

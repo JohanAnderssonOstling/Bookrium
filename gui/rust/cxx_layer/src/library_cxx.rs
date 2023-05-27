@@ -9,13 +9,11 @@ lazy_static!(
 );
 
 fn open_library(uuid: &str) {
-    println!("open_library with uuid: {}", uuid);
     let mut library_app = LIBRARY_APP.lock().unwrap();
     library_app.open(uuid, "url");
 }
 
 fn get_media_files(uuid: &str) -> Vec<MediaFile>{
-    println!("get_media_files from uuid: {}", uuid);
     let mut library_app = LIBRARY_APP.lock().unwrap();
     let files = library_app.get_files(uuid).unwrap();
     let mut media_files = Vec::new();
