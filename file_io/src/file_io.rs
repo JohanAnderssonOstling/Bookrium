@@ -8,9 +8,7 @@ use std::io::*;
 use image::{DynamicImage, io::Reader as ImageReader};use std::io::Cursor;
 
 lazy_static! {
-    pub static ref PROJECT_DIRS: ProjectDirs =
-        ProjectDirs::from("com", "josh", "media_library").unwrap();
-
+    pub static ref PROJECT_DIRS: ProjectDirs = ProjectDirs::from("com", "josh", "media_library").unwrap();
     pub static ref DATA_DIR: String = PROJECT_DIRS.data_dir().to_str().unwrap().to_string();
     pub static ref LIBRARY_DIR: String = format!("{}/libraries", DATA_DIR.as_str());
     pub static ref DB_PATH: String = format!("{}/client.db", DATA_DIR.as_str());
