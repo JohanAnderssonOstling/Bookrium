@@ -3,40 +3,36 @@ use pdf::any::AnySync;
 use pdf::enc::StreamFilter;
 use pdf::file::{FileOptions, ObjectCache, StreamCache, File};
 use pdf::{object::*, PdfError};
-use library_types::Pdf;
+use pdf::primitive::Dictionary;
+use library_types::{Media, Pdf};
+use Media::PdfType;
 
-
-pub fn parse_pdf(path: &Path) -> Pdf {
+pub fn parse_pdf(path: &Path) -> (Media, Option<Vec<u8>>) {
     let file = FileOptions::cached().open(path).unwrap();
     let info = file.trailer.info_dict.as_ref().unwrap();
 
-    let title = info.get("Title").and_then(|p| p.to_string_lossy().ok()).unwrap_or("".to_string());
-    let author = info
-        .get("Author")
-        .and_then(|p| p.to_string_lossy().ok())
-        .unwrap_or("".to_string());
-    let page_count = info
-        .get("Pages")
-        .and_then(|p| p.as_integer().ok())
-        .unwrap_or(0) as u32;
-    let isbn = info
-        .get("ISBN")
-        .or_else(|| info.get("isbn"))
-        .and_then(|p| p.to_string_lossy().ok())
-        .unwrap_or("".to_string());
-    let creator = info
-        .get("Creator")
-        .or_else(|| info.get("creator").or_else(|| info.get("CREATOR")))
-        .and_then(|p| p.to_string_lossy().ok())
-        .unwrap_or("".to_string());
+    let title = get_str_property(info, "Title");
+    let author = get_str_property(info, "Author");
+    let isbn = get_str_property(info, "ISBN");
+    let page_count = get_u32_property(info, "Pages");
 
-    let cover = get_cover(&file).expect("Error when trying to get the cover the pdf file");
+    let cover = get_cover(&file).ok();
+    let pdf = Pdf::new(title, author, isbn, page_count);
+    (PdfType(pdf), cover)
+}
 
-    Pdf::new("".to_string(), 0, title, author, isbn, page_count, creator, cover)
+fn get_str_property(info: &Dictionary, key: &str) -> String {
+    info.get(key).and_then(|p| p.to_string_lossy().ok()).
+        unwrap_or("".to_string())
+}
+fn get_u32_property(info: &Dictionary, key: &str) -> u32 {
+    info.get(key).and_then(|p| p.as_integer().ok()).
+        unwrap_or(0) as u32
 }
 
 
-pub fn get_cover(file: &File<Vec<u8>, ObjectCache, StreamCache>) -> Result<Vec<u8>, PdfError> {
+
+fn get_cover(file: &File<Vec<u8>, ObjectCache, StreamCache>) -> Result<Vec<u8>, PdfError> {
     let first_page = file.get_page(0)?;
     let resources = first_page.resources()?;
     let mut images: Vec<_> = vec![];
@@ -51,15 +47,10 @@ pub fn get_cover(file: &File<Vec<u8>, ObjectCache, StreamCache>) -> Result<Vec<u
             XObject::Image(ref im) => im,
             _ => continue
         };
-        let (data, filter) = img.raw_image_data(file)?;
-        let ext = match filter {
-            Some(StreamFilter::DCTDecode(_)) => "jpeg",
-            Some(StreamFilter::JBIG2Decode) => "jbig2",
-            Some(StreamFilter::JPXDecode) => "jp2k",
-            _ => continue,
-        };
 
+        let (data, filter) = img.raw_image_data(file)?;
         return Ok(Vec::from(data.as_ref()));
     }
     Ok(Vec::new())
 }
+
