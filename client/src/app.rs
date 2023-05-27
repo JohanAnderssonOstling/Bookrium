@@ -1,7 +1,6 @@
 use lazy_static::lazy_static;
-use client_model::{ClientModel, init_db};
+use crate::model::*;
 use library_types::Library;
-use std::thread;
 use tokio::runtime::Runtime;
 
 lazy_static!(

@@ -1,13 +1,10 @@
 [workspace]
 
 members = [
-    "client_model",
-    "library_model",
+    "client",
+    "library",
     "file_io",
-    "client_cli",
-    "client_app",
     "server",
     "library_types",
     "db_wrapper",
-    "library_app"
 ]

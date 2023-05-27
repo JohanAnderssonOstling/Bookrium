@@ -15,8 +15,8 @@ cxx = "1.0.83"
 lazy_static = "1.4.0"
 tokio = "1.28.0"
 
-client_app = { path = "../../../client_app" }
-library_app = { path = "../../../library_app" }
+client = { path = "../../../client" }
+library = { path = "../../../library" }
 library_types = { path = "../../../library_types" }
 file_io = { path = "../../../file_io" }
 

@@ -11,3 +11,6 @@ dirs = "5.0.0"
 directories = "5.0"
 iter_tools = "0.1.4"
 image = "0.24.6"
+pdf = "0.8.1"
+rbook = "0.5.0"
+library_types = {path = "../library_types"}

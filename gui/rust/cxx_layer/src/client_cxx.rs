@@ -1,15 +1,16 @@
 use ffi::Library;
+use client::*;
 
 fn start_db() {
-    client_app::start_db();
+    app::start_db();
 }
 
 fn create_library(name: &str, path: &str, url: &str) -> Library{
-    convert_library(client_app::create_library(name, path, url))
+    convert_library(app::create_library(name, path, url))
 }
 
 fn get_libraries() -> Vec<Library>{
-    let rust_libraries = client_app::get_libraries();
+    let rust_libraries = app::get_libraries();
     let mut cxx_libraries = Vec::new();
     for rust_library in rust_libraries {
         cxx_libraries.push(convert_library(rust_library));
@@ -18,7 +19,7 @@ fn get_libraries() -> Vec<Library>{
 }
 
 fn delete_library(uuid: &str){
-    client_app::delete_library(uuid)
+    app::delete_library(uuid)
 }
 
 fn convert_library(library: library_types::Library) -> Library {

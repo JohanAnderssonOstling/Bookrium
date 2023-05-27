@@ -2,7 +2,7 @@ use std::fmt::format;
 use std::process::Command;
 use std::io::BufRead;
 use std::process::Stdio;
-use file_io::client_file_io::*;
+use file_io::file_io::*;
 /// Starts the server
 pub fn start_db_server() {
     let db_path = CLIENT_DB_PATH.as_str();

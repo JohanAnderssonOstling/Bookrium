@@ -1,9 +1,9 @@
 use lazy_static::lazy_static;
 use crate::library_cxx::library_ffi::MediaFile;
-use library_app::LibraryApp;
+use library::app::LibraryApp;
 use std::sync::Mutex;
-use file_io::client_file_io::LIBRARY_DIR;
-
+use file_io::file_io::LIBRARY_DIR;
+use std::path::Path;
 lazy_static!(
     static ref LIBRARY_APP: Mutex<LibraryApp> = Mutex::new(LibraryApp::new());
 );
@@ -29,7 +29,7 @@ fn get_media_files(uuid: &str) -> Vec<MediaFile>{
 }
 
 fn has_cover(library_uuid: &str, file_uuid: &str) -> bool {
-    std::path::Path::new(format!("{}/{}/{}/thumbnails", LIBRARY_DIR.as_str(), library_uuid, file_uuid).as_str()).exists()
+    Path::new(format!("{}/{}/{}/thumbnails", LIBRARY_DIR.as_str(), library_uuid, file_uuid).as_str()).exists()
 }
 
 fn get_cover_path(library_uuid: &str, file_uuid: &str) -> String {

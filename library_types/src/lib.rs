@@ -25,13 +25,11 @@ impl Epub {
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Default)]
 pub struct Pdf {
-    pub read_location: String,
-    pub read_percentage: u32,
+    pub read_location: String,      pub read_percentage: u32,
     pub title: String,
-    pub author: String,
+    pub author: String,             pub creator: String,
     pub isbn: String,
     pub page_count: u32,
-    pub creator: String,
     pub cover: Vec<u8>,
 }
 
