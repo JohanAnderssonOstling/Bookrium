@@ -37,12 +37,7 @@ pub fn create_library_files(library_path_str: &str) -> IoResult<()> {
 
 pub fn convert_img(image_data: Vec<u8>) -> Option<DynamicImage>{
     let reader = ImageReader::new(Cursor::new(image_data)).with_guessed_format().expect("Cursor io never fails");
-    let image_result = reader.decode();
-    let image = match image_result {
-        Ok(image) => Some(image),
-        Err(e) => None,
-    };
-    image
+    reader.decode().ok()
 }
 
 pub async fn create_thumbnails_raw(library_uuid: &str, file_uuid: &str, image_data: Vec<u8>){

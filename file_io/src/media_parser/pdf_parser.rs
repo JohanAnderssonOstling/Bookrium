@@ -1,6 +1,4 @@
 use std::path::Path;
-use pdf::any::AnySync;
-use pdf::enc::StreamFilter;
 use pdf::file::{FileOptions, ObjectCache, StreamCache, File};
 use pdf::{object::*, PdfError};
 use pdf::primitive::Dictionary;
@@ -25,12 +23,11 @@ fn get_str_property(info: &Dictionary, key: &str) -> String {
     info.get(key).and_then(|p| p.to_string_lossy().ok()).
         unwrap_or("".to_string())
 }
+
 fn get_u32_property(info: &Dictionary, key: &str) -> u32 {
     info.get(key).and_then(|p| p.as_integer().ok()).
         unwrap_or(0) as u32
 }
-
-
 
 fn get_cover(file: &File<Vec<u8>, ObjectCache, StreamCache>) -> Result<Vec<u8>, PdfError> {
     let first_page = file.get_page(0)?;
