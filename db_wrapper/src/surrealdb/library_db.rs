@@ -34,23 +34,28 @@ impl LibraryDBConn{
         Ok(Self { uuid: uuid.to_string() })
     }
 
-    pub async fn insert_media_file(&self, media_file: &MediaFile) -> Result<Record, Error>{
+    pub async fn insert_file(&self, file: &MediaFile) -> Result<Record, Error>{
         DB.use_ns("library").use_db("library").await?;
-        DB.create("media_file").content(media_file).await
+        DB.create("media_file").content(file).await
     }
 
-    pub async fn select_media_file(&self, uuid: &str) -> Result<MediaFile, Error> {
+    pub async fn select_file(&self, uuid: &str) -> Result<MediaFile, Error> {
         DB.use_ns("library").use_db("library").await?;
         DB.select(("media_file", uuid)).await
     }
 
-    pub async fn select_media_files(&self) -> Result<Vec<MediaFile>, Error> {
+    pub async fn select_files(&self) -> Result<Vec<MediaFile>, Error> {
         DB.use_ns("library").use_db("library").await?;
         DB.select("media_file").await
     }
 
-    pub async fn delete_media_file(&self, uuid: &str) -> Result<Record, Error> {
+    pub async fn delete_file(&self, uuid: &str) -> Result<Record, Error> {
         DB.use_ns("library").use_db("library").await?;
         DB.delete(("media_file", uuid)).await
+    }
+
+    pub async fn clear_library(&self) -> Result<(Vec<MediaFile>), Error> {
+        DB.use_ns("library").use_db("library").await?;
+        DB.delete("media_file").await
     }
 }
