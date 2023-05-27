@@ -2,21 +2,22 @@ use std::path::Path;
 use pdf::file::{FileOptions, ObjectCache, StreamCache, File};
 use pdf::{object::*, PdfError};
 use pdf::primitive::Dictionary;
-use library_types::{Media, Pdf};
-use Media::PdfType;
+use library_types::*;
+use library_types::Media::EbookType;
+
 
 pub fn parse_pdf(path: &Path) -> (Media, Option<Vec<u8>>) {
     let file = FileOptions::cached().open(path).unwrap();
     let info = file.trailer.info_dict.as_ref().unwrap();
 
     let title = get_str_property(info, "Title");
-    let author = get_str_property(info, "Author");
     let isbn = get_str_property(info, "ISBN");
     let page_count = get_u32_property(info, "Pages");
 
     let cover = get_cover(&file).ok();
-    let pdf = Pdf::new(title, author, isbn, page_count);
-    (PdfType(pdf), cover)
+    let pdf = Pdf::new(page_count);
+    let ebook = Ebook::new(title, isbn, BookFormat::PdfType(pdf));
+    (EbookType(ebook), cover)
 }
 
 fn get_str_property(info: &Dictionary, key: &str) -> String {
