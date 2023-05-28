@@ -21,7 +21,7 @@ impl LibraryDBConn {
 	pub fn new(uuid: &str) -> Self{
 		DB.version();
 		let db_conn = Self { uuid: uuid.to_string(), db: &DB };
-		RUNTIME.block_on(db_conn.create_schema());
+		//RUNTIME.block_on(db_conn.create_schema());
 		db_conn
 	}
 

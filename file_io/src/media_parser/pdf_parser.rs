@@ -3,7 +3,6 @@ use pdf::file::{FileOptions, ObjectCache, StreamCache, File};
 use pdf::{object::*, PdfError};
 use pdf::primitive::Dictionary;
 use library_types::*;
-use library_types::MediaType::EbookType;
 
 
 pub fn parse_pdf(path: &Path, mut media: MediaFile) -> (MediaFile, Option<Vec<u8>>) {
@@ -15,9 +14,6 @@ pub fn parse_pdf(path: &Path, mut media: MediaFile) -> (MediaFile, Option<Vec<u8
     media.duration = get_str_property(info, "Pages");
 
     let cover = get_cover(&file).ok();
-    let pdf = Pdf{};
-    let ebook = Ebook::new(title, isbn, BookFormat::PdfType(pdf));
-    media.media_type = EbookType(ebook);
     (media, cover)
 }
 

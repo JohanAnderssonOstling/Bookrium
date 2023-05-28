@@ -3,11 +3,9 @@ use crate::library_cxx::library_ffi::MediaFile;
 use std::sync::Mutex;
 use file_io::file_io::LIBRARY_DIR;
 use std::path::Path;
-use tokio::runtime::Runtime;
 use library::model::LibraryModel;
 use std::collections::HashMap;
 lazy_static!(
-    static ref RUNTIME: Runtime = Runtime::new().unwrap();
     static ref LIBRARIES: Mutex<HashMap<String, LibraryModel>> = Mutex::new(HashMap::new());
 );
 
@@ -19,7 +17,7 @@ fn open_library(uuid: &str) {
 fn get_media_files(uuid: &str) -> Vec<MediaFile>{
     let mut library_lock = LIBRARIES.lock().unwrap();
     let library = library_lock.get_mut(uuid).unwrap();
-    let files = RUNTIME.block_on(library.fetch_files());
+    let files = (library.fetch_files());
 
     let mut media_files = Vec::new();
     for file in files {
@@ -31,19 +29,19 @@ fn get_media_files(uuid: &str) -> Vec<MediaFile>{
 fn scan_library(uuid: &str, path: &str) {
     let mut library_lock = LIBRARIES.lock().unwrap();
     let library = library_lock.get_mut(uuid).unwrap();
-    RUNTIME.block_on(library.scan_library(path));
+    library.scan_library(path);
 }
 
 fn set_media_position(library_uuid: &str, file_uuid: &str, position: &str) {
     let mut library_lock = LIBRARIES.lock().unwrap();
     let library = library_lock.get_mut(library_uuid).unwrap();
-    RUNTIME.block_on(library.set_media_position(file_uuid, position));
+    (library.set_media_position(file_uuid, position));
 }
 
 fn get_media_position(library_uuid: &str, file_uuid: &str) -> String {
     let mut library_lock = LIBRARIES.lock().unwrap();
     let library = library_lock.get_mut(library_uuid).unwrap();
-    RUNTIME.block_on(library.get_media_position(file_uuid))
+    (library.get_media_position(file_uuid))
 }
 
 fn has_cover(library_uuid: &str, file_uuid: &str) -> bool {

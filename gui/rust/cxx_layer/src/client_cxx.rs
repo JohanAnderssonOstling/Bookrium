@@ -1,9 +1,8 @@
 use ffi::Library;
 use client::*;
 
-fn start_db() {
-    app::start_db();
-}
+fn start_db(){}
+
 
 fn create_library(name: &str, path: &str, url: &str) -> Library{
     convert_library(app::create_library(name, path, url))

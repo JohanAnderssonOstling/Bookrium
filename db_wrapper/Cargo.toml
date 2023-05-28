@@ -11,6 +11,8 @@ serde = { version = "1.0", features = ["derive"] }
 library_types = { path = "../library_types" }
 serde_json = "1.0.70"
 tokio = { version = "1.0", features = ["full"] }
+rusqlite = "0.29.0"
+include-sqlite-sql = "0.2.1"
 csv = "1.1.6"
 async-trait = "0.1.68"
 lazy_static = "1.4.0"

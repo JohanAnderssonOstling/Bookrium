@@ -38,12 +38,12 @@ pub fn convert_img(image_data: Vec<u8>) -> Option<DynamicImage>{
     reader.decode().ok()
 }
 
-pub async fn create_thumbnails_raw(library_uuid: &str, file_uuid: &str, image_data: Vec<u8>){
+pub fn create_thumbnails_raw(library_uuid: &str, file_uuid: &str, image_data: Vec<u8>){
     let image = convert_img(image_data).unwrap();
-    create_thumbnails(library_uuid, file_uuid, image).await;
+    create_thumbnails(library_uuid, file_uuid, image);
 }
 
-pub async fn create_thumbnails(library_uuid: &str, file_uuid: &str, image: DynamicImage){
+pub fn create_thumbnails(library_uuid: &str, file_uuid: &str, image: DynamicImage){
     let thumbnail_sizes: Vec<u32> = vec![128,256,512,1024];
 
     let height_ratio:f32 = 1.6;
