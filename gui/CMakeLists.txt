@@ -9,19 +9,14 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS true)
 
-
-
 find_package(Qt6 COMPONENTS Core Gui Qml QuickControls2 QmlImportScanner)
-
 find_package(Corrosion REQUIRED)
 include(corrosion_cxx.cmake)
 
-#corrosion_import_crate(MANIFEST_PATH rust/Cargo.toml CRATES gui)
-
 qt_add_executable(Castafiore
         cpp/main.cpp cpp/homemodel.cpp cpp/librarymodel.cpp
-        cpp/homemodel.h cpp/librarymodel.h
-        qml/main.qml cpp/rust_util.h)
+        cpp/homemodel.h cpp/librarymodel.h cpp/rust_util.h
+        qml/main.qml qml/HomeView.qml qml/HomeViewDelegate.qml qml/LibraryView.qml qml/LibraryViewDelegate.qml qml/PDFReader.qml)
 
 add_library_rust(PATH rust/cxx_layer NAMESPACE castafiore_cxx)
 target_link_libraries(Castafiore

@@ -4,22 +4,15 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Default)]
-pub enum Media {
+pub enum MediaType {
     #[default]
     DirType,
     EbookType(Ebook),
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Default)]
-pub struct Epub {
+pub struct Epub {}
 
-}
-
-impl Epub {
-    pub fn new() -> Self {
-        Self {}
-    }
-}
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
 pub enum BookFormat {
@@ -40,32 +33,27 @@ impl Ebook {
 }
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Default)]
-pub struct Pdf {
-    pub current_page: u32, pub page_count: u32,
-}
+pub struct Pdf {}
 
-impl Pdf {
-    pub fn new(page_count: u32) -> Self {
-        Self { current_page: 0, page_count }
-    }
-}
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Default)]
 pub struct MediaFile {
     pub path: String,
     pub uuid: String,
     pub parent_dir_uuid: String,
-    pub media: Media,
+    pub duration: String,
+    pub position: String,
+    pub media_type: MediaType,
 }
 
 
 impl MediaFile {
-    pub fn new(path: &Path, parent_dir_uuid: &str, media: Media) -> Self {
+    pub fn new(path: &Path, parent_dir_uuid: &str) -> Self {
         Self {
             uuid: Uuid::new_v4().to_string(),
             path: path.to_str().unwrap().to_string(),
             parent_dir_uuid: parent_dir_uuid.to_string(),
-            media,
+            ..Default::default()
         }
     }
 }
@@ -86,6 +74,7 @@ impl Library {
             name: name.to_string(),
             path: path.to_string(),
             url: url.to_string(),
+
         }
     }
 }

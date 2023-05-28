@@ -3,31 +3,27 @@ use pdf::file::{FileOptions, ObjectCache, StreamCache, File};
 use pdf::{object::*, PdfError};
 use pdf::primitive::Dictionary;
 use library_types::*;
-use library_types::Media::EbookType;
+use library_types::MediaType::EbookType;
 
 
-pub fn parse_pdf(path: &Path) -> (Media, Option<Vec<u8>>) {
+pub fn parse_pdf(path: &Path, mut media: MediaFile) -> (MediaFile, Option<Vec<u8>>) {
     let file = FileOptions::cached().open(path).unwrap();
     let info = file.trailer.info_dict.as_ref().unwrap();
 
     let title = get_str_property(info, "Title");
     let isbn = get_str_property(info, "ISBN");
-    let page_count = get_u32_property(info, "Pages");
+    media.duration = get_str_property(info, "Pages");
 
     let cover = get_cover(&file).ok();
-    let pdf = Pdf::new(page_count);
+    let pdf = Pdf{};
     let ebook = Ebook::new(title, isbn, BookFormat::PdfType(pdf));
-    (EbookType(ebook), cover)
+    media.media_type = EbookType(ebook);
+    (media, cover)
 }
 
 fn get_str_property(info: &Dictionary, key: &str) -> String {
     info.get(key).and_then(|p| p.to_string_lossy().ok()).
         unwrap_or("".to_string())
-}
-
-fn get_u32_property(info: &Dictionary, key: &str) -> u32 {
-    info.get(key).and_then(|p| p.as_integer().ok()).
-        unwrap_or(0) as u32
 }
 
 fn get_cover(file: &File<Vec<u8>, ObjectCache, StreamCache>) -> Result<Vec<u8>, PdfError> {
