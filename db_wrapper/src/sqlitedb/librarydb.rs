@@ -1,6 +1,8 @@
-use library_types::{Dir, MediaFile};
+use library_types::{Dir, MediaFile, Navigation, NavPoint};
 use include_sqlite_sql::{include_sql, impl_sql};
-
+use rusqlite::ToSql;
+use rusqlite::types::ToSqlOutput;
+use serde_json::json;
 include_sql!("src/library.sql");
 
 pub struct LibraryDBConn {
@@ -28,9 +30,14 @@ impl LibraryDBConn{
 
 	pub fn insert_media(&self, media: &MediaFile) {
 		self.db.insert_media(
-			media.uuid.as_str(), media.path.as_str(),
-			media.duration.as_str(), media.position.as_str(),
-			media.parent_dir_uuid.as_str()).unwrap();
+			media.uuid.as_str(),
+			media.path.as_str(),
+			media.duration.as_str(),
+			media.position.as_str(),
+			media.parent_dir_uuid.as_str(),
+			serde_json::to_string(&media.navigation).unwrap().as_str(),
+			media.title.as_str(),
+			media.description.as_str()).unwrap();
 	}
 
 	pub fn fetch_media(&self, parent_dir_uuid: &str) -> Vec<MediaFile> {
@@ -39,6 +46,7 @@ impl LibraryDBConn{
 			media.push(deserialize_media(row).unwrap());
 			Ok(())
 		}).expect("Error getting media");
+
 		media
 	}
 
@@ -62,9 +70,14 @@ fn deserialize_dir(row: &rusqlite::Row) -> rusqlite::Result<Dir> {
 }
 
 fn deserialize_media(row: &rusqlite::Row) -> rusqlite::Result<MediaFile> {
+	let navigation_json: String = row.get(5)?;
 	Ok(MediaFile {
-		uuid: row.get(0)?, path: row.get(1)?, duration: row.get(2)?, position: row.get(3)?,
-		parent_dir_uuid: row.get(4)?,
+		uuid: row.get(0)?, path: row.get(1)?, duration: row.get(2)?,
+		position: row.get(3)?, parent_dir_uuid: row.get(4)?,
+		navigation: serde_json::from_str(navigation_json.as_str()).unwrap(),
+		title: row.get(6)?, description: row.get(7)?,
 	})
 }
+
+
 

@@ -1,5 +1,5 @@
 use std::fs::File;
-use library_types::Library;
+use library_types::home_types::Library;
 use csv::*;
 pub struct ClientDBConn {
     pub path: String

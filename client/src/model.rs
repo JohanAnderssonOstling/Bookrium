@@ -1,5 +1,5 @@
 use db_wrapper::csvdb::client_db::*;
-use library_types::Library;
+use library_types::home_types::Library;
 
 pub struct ClientModel {
     conn: ClientDBConn, // Connection to the database

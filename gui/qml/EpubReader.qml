@@ -29,7 +29,15 @@ ColumnLayout{
 			epubWebView.runJavaScript(function_call);
 		}
 
-		Keys.onRightPressed: epubWebView.runJavaScript("nextPage();");
-		Keys.onLeftPressed: epubWebView.runJavaScript("prevPage()");
+		Keys.onRightPressed: {
+			if (event.modifiers & Qt.ControlModifier) epubWebView.runJavaScript("nextChapter();");
+			else epubWebView.runJavaScript("nextPage();");
+			event.accepted = true;
 		}
+		Keys.onLeftPressed: {
+			if (event.modifiers & Qt.ControlModifier) epubWebView.runJavaScript("prevChapter();");
+			else epubWebView.runJavaScript("prevPage()");
+			event.accepted = true;
+		}
+	}
 }

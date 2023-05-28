@@ -19,11 +19,12 @@ function nextPage() {
     rendition.next();
 }
 
+
+
 function get_cfi() {
     return currentCfi;
 }
 
 function set_cfi(epubCfi) {
-	console.log("JS: set_cfi: " + epubCfi);
 	rendition.display(epubCfi);
 }

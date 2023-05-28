@@ -19,8 +19,11 @@ SELECT dir_uuid, name FROM dir WHERE parent_dir_uuid = :parent_dir_uuid;
 -- param: duration: &str
 -- param: position: &str
 -- param: parent_dir_uuid: &str
-INSERT INTO media (media_uuid, path, duration, position, parent_dir_uuid)
-VALUES (:media_uuid, :path, :duration, :position, :parent_dir_uuid);
+-- param: navigation: &str
+-- param: title: &str
+-- param: description: &str
+INSERT INTO media (media_uuid, path, duration, position, parent_dir_uuid, navigation, title, description)
+VALUES (:media_uuid, :path, :duration, :position, :parent_dir_uuid, :navigation, :title, :description);
 
 
 -- name: get_media?

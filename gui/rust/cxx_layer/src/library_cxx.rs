@@ -24,6 +24,9 @@ fn get_media_files(uuid: &str) -> Vec<MediaFile> {
 		media_files.push(MediaFile {
 			uuid: file.uuid,
 			path: file.path,
+			title: file.title,
+			description: file.description,
+			navigation: convert_navigation(file.navigation),
 		});
 	}
 	media_files
@@ -55,12 +58,43 @@ fn get_cover_path(library_uuid: &str, file_uuid: &str) -> String {
 	format!("{}/{}/{}/thumbnails/256.jpg", LIBRARY_DIR.as_str(), library_uuid, file_uuid)
 }
 
+fn convert_navigation(navigation: library_types::Navigation) -> library_ffi::Navigation {
+	library_ffi::Navigation {
+		nav_points: convert_nav_point(navigation.nav_points),
+	}
+}
+
+fn convert_nav_point(nav_points: Vec<library_types::NavPoint>) -> Vec<library_ffi::NavPoint> {
+	let mut nav_points_ffi = Vec::new();
+	for nav_point in nav_points {
+		nav_points_ffi.push(library_ffi::NavPoint {
+			name: nav_point.name,
+			href: nav_point.href,
+			children: convert_nav_point(nav_point.children),
+		});
+	}
+	nav_points_ffi
+}
+
 
 #[cxx::bridge]
 mod library_ffi {
 	pub struct MediaFile {
 		pub uuid: String,
 		pub path: String,
+		pub title: String,
+		pub description: String,
+		pub navigation: Navigation,
+	}
+
+	pub struct Navigation {
+		pub nav_points: Vec<NavPoint>,
+	}
+
+	pub struct NavPoint {
+		pub name: String,
+		pub href: String,
+		pub children: Vec<NavPoint>,
 	}
 
 	extern "Rust" {

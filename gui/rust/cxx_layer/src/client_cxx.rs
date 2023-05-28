@@ -21,7 +21,7 @@ fn delete_library(uuid: &str){
     app::delete_library(uuid)
 }
 
-fn convert_library(library: library_types::Library) -> Library {
+fn convert_library(library: library_types::home_types::Library) -> Library {
     Library { uuid: library.uuid, name: library.name, path: library.path}
 }
 

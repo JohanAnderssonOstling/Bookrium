@@ -1,6 +1,6 @@
 use lazy_static::lazy_static;
 use crate::model::*;
-use library_types::Library;
+use library_types::home_types::Library;
 
 lazy_static!(
     static ref CLIENT: ClientModel = ClientModel::new();
