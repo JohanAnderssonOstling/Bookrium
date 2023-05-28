@@ -61,11 +61,13 @@ void LibraryModel::updateMediaFiles() {
 
 void
 LibraryModel::setMediaPosition(const QString &uuid, const QString &location) {
+	qInfo() << "setMediaPosition" << uuid << location;
 	set_media_position(this->library_uuid, asRustStr(uuid), asRustStr(location));
 }
 
 QString LibraryModel::getMediaPosition(const QString &uuid) {
-	rust::string pos = get_media_position(this->library_uuid, asRustStr(uuid));
-	return asQStr(pos);
+	QString pos = asQStr(get_media_position(this->library_uuid, asRustStr(uuid)));
+	qInfo() << "getMediaPosition" << uuid << pos;
+	return pos;
 }
 

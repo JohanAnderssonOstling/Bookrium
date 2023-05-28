@@ -11,32 +11,6 @@ Column{
 	width: parent.cellWidth
 	height: parent.cellHeight
 
-	Rectangle{
-		id: coverPlaceHolder
-		visible: !hasCover
-		width: column.coverWidth
-		height: column.coverHeight
-		color: "cornflowerblue"
-		MouseArea{
-			anchors.fill: parent
-			onClicked:{
-				var pdfReaderComponent = Qt.createComponent("PDFReader.qml");
-				if (pdfReaderComponent.status == Component.Ready){
-					var pdfReader = pdfReaderComponent.createObject(parent);
-					pdfReader.documentSource = "file://" + path
-					pdfReader.title = name +" uuid: " +uuid //+ " location: " + location
-					pdfReader.uuid = uuid
-					pdfReader.init_read_location = 0
-					stackView.push(pdfReader);
-				}
-				else{
-					console.log("error loading component");
-					console.log(pdfReaderComponent.errorString());
-				}
-			}
-		}
-	}
-
 	Image{
 		id: image
 		visible: hasCover
@@ -44,25 +18,35 @@ Column{
 		asynchronous: true
 		MouseArea{
 			anchors.fill: parent
-			onClicked:{
-
-				console.log("clicked")
-				var pdfReaderComponent = Qt.createComponent("PDFReader.qml");
-				if (pdfReaderComponent.status == Component.Ready){
-					var pdfReader = pdfReaderComponent.createObject(parent);
-					pdfReader.documentSource = "file://" + path
-					pdfReader.title = name +" uuid: " +uuid// + " location: " + location
-					pdfReader.uuid = uuid
-					pdfReader.init_read_location = 0
-					stackView.push(pdfReader);
-				}
-				else{
-					console.log("error loading component");
-					console.log(pdfReaderComponent.errorString());
-				}
+			onClicked: openMedia()
+		function openMedia(){
+			let extension = path.split(".").pop();
+			if (extension === "pdf") openPdf();
+			if (extension === "epub") openEpub();
+		}
+		function openPdf(){
+			var pdfReaderComponent = Qt.createComponent("PDFReader.qml");
+			if (pdfReaderComponent.status === Component.Ready){
+				var pdfReader = pdfReaderComponent.createObject(parent);
+				pdfReader.documentSource = "file://" + path
+				pdfReader.title = name +" uuid: " +uuid// + " location: " + location
+				pdfReader.uuid = uuid
+				pdfReader.init_read_location = 0
+				stackView.push(pdfReader);
+			}
+			else{
+				console.log("error loading component");
+				console.log(pdfReaderComponent.errorString());
 			}
 		}
-
+		function openEpub(){
+			var epubReaderComponent = Qt.createComponent("EpubReader.qml");
+			if (epubReaderComponent.status === Component.Ready){
+				var epubReader = epubReaderComponent.createObject(parent);
+				epubReader.bookUUID = uuid;
+				stackView.push(epubReader);
+			}
+		}}
 	}
 	Text{
 		width: parent.width
