@@ -26,7 +26,7 @@ QVariant LibraryModel::data(const QModelIndex &index, int role) const {
 	switch (role) {
 		case UUIDRole: return asQStr(mediaFile.uuid);
 		case PathRole: return asQStr(mediaFile.path);
-		case NameRole: return asQStr(mediaFile.path).split("/").last();
+		case NameRole: qInfo() << "name" << asQStr(mediaFile.path).split("/").last(); return asQStr(mediaFile.path).split("/").last();
 		case HasCoverRole: return has_cover(this->library_uuid, mediaFile.uuid);
 		case CoverRole:
 			return asQStr(get_cover_path(this->library_uuid, mediaFile.uuid));

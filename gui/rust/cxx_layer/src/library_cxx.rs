@@ -24,7 +24,6 @@ fn get_media_files(uuid: &str) -> Vec<MediaFile> {
 		media_files.push(MediaFile {
 			uuid: file.uuid,
 			path: file.path,
-			position: file.position
 		});
 	}
 	media_files
@@ -62,7 +61,6 @@ mod library_ffi {
 	pub struct MediaFile {
 		pub uuid: String,
 		pub path: String,
-		pub position: String,
 	}
 
 	extern "Rust" {
