@@ -1,7 +1,6 @@
 use lazy_static::lazy_static;
 use crate::model::*;
 use library_types::Library;
-use tokio::runtime::Runtime;
 
 lazy_static!(
     static ref CLIENT: ClientModel = ClientModel::new();

@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 library_types = { path = "../library_types" }
-rusqlite = "0.29.0"
+rusqlite = { version = "0.29.0", features = ["bundled"] }
 include-sqlite-sql = "0.2.1"
 csv = "1.1.6"
 lazy_static = "1.4.0"

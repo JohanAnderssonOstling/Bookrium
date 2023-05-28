@@ -29,7 +29,10 @@ ColumnLayout{
 			if (status == 1 && !first){
 				first = true;
 				console.log("Loaded book: " + name + " at position " + init_read_location);
-				pdfPageView.goToPage(init_read_location);
+				let init_page = libraryModel.getMediaPosition(uuid);
+				let page = parseInt(init_page);
+				console.log("Seting page to" + page);
+				setPage(page);
 			}
 		}
 		focus: true

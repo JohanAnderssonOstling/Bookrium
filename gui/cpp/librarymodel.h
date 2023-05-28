@@ -25,8 +25,6 @@ public:
 				UUIDRole = Qt::UserRole,
 				NameRole,
 				PathRole,
-				AuthRole,
-				LocationRole,
 				HasCoverRole,
 				CoverRole
 		};
@@ -44,4 +42,5 @@ public slots:
 		void updateMediaFiles();
 		void openLibrary(const QString &path, const QString &uuid);
 		void setMediaPosition(const QString &uuid, const QString &location);
+		QString getMediaPosition(const QString &uuid);
 };

@@ -24,14 +24,10 @@ QVariant LibraryModel::data(const QModelIndex &index, int role) const {
 	const MediaFile mediaFile = media_files.at(index.row());
 
 	switch (role) {
-		case UUIDRole:
-			return asQStr(mediaFile.uuid);
-		case PathRole:
-			return asQStr(mediaFile.path);
-		case NameRole:
-			return asQStr(mediaFile.path).split("/").last();
-		case HasCoverRole:
-			return has_cover(this->library_uuid, mediaFile.uuid);
+		case UUIDRole: return asQStr(mediaFile.uuid);
+		case PathRole: return asQStr(mediaFile.path);
+		case NameRole: return asQStr(mediaFile.path).split("/").last();
+		case HasCoverRole: return has_cover(this->library_uuid, mediaFile.uuid);
 		case CoverRole:
 			return asQStr(get_cover_path(this->library_uuid, mediaFile.uuid));
 	}
@@ -45,11 +41,11 @@ int LibraryModel::rowCount(const QModelIndex &parent) const {
 int LibraryModel::columnCount(const QModelIndex &parent) const { return 1; }
 
 QHash<int, QByteArray> LibraryModel::roleNames() const {
-	return {{UUIDRole,     "uuid"},
-					{PathRole,     "path"},
-					{NameRole,     "name"},
+	return {{UUIDRole, "uuid"},
+					{NameRole, "name"},
+					{PathRole, "path"},
 					{HasCoverRole, "hasCover"},
-					{CoverRole,    "cover"}};
+					{CoverRole, "cover"}};
 }
 
 void LibraryModel::scanLibrary() {
@@ -63,7 +59,13 @@ void LibraryModel::updateMediaFiles() {
 	endResetModel();
 }
 
-void LibraryModel::setMediaPosition(const QString &uuid, const QString &location) {
+void
+LibraryModel::setMediaPosition(const QString &uuid, const QString &location) {
 	set_media_position(this->library_uuid, asRustStr(uuid), asRustStr(location));
+}
+
+QString LibraryModel::getMediaPosition(const QString &uuid) {
+	rust::string pos = get_media_position(this->library_uuid, asRustStr(uuid));
+	return asQStr(pos);
 }
 

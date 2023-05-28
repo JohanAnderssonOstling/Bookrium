@@ -9,7 +9,7 @@ pub struct LibraryDBConn {
 
 impl LibraryDBConn{
 	pub fn new (uuid: &str) -> Self{
-		let db = rusqlite::Connection::open("/home/johan/.local/share/media_library/libraries/test/").unwrap();
+		let db = rusqlite::Connection::open("/home/johan/.local/share/media_library/libraries/test/library.db").unwrap();
 		Self { db }
 	}
 	pub fn insert_dir(&self, dir: &Dir) {
