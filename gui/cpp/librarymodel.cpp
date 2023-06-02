@@ -22,9 +22,7 @@ void LibraryModel::openLibrary(const QString &uuid, const QString &path) {
 
 QString get_media_name(const MediaFile &mediaFile) {
 	QString title = asQStr(mediaFile.title);
-	if (title.isEmpty()) {
-		title = asQStr(mediaFile.path).split("/").last();
-	}
+	if (title.isEmpty()) title = asQStr(mediaFile.path).split("/").last();
 	return title;
 }
 
@@ -40,8 +38,6 @@ QVariant LibraryModel::data(const QModelIndex &index, int role) const {
 			return asQStr(get_cover_path(this->library_uuid, mediaFile.uuid));
 	}
 }
-
-
 
 
 int LibraryModel::rowCount(const QModelIndex &parent) const {

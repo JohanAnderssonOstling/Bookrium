@@ -92,9 +92,7 @@ mod library_ffi {
 	}
 
 	pub struct NavPoint {
-		pub name: String,
-		pub href: String,
-		pub children: Vec<NavPoint>,
+		pub name: String, pub href: String, pub children: Vec<NavPoint>,
 	}
 
 	extern "Rust" {

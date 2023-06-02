@@ -44,15 +44,16 @@ pub fn create_thumbnails_raw(library_uuid: &str, file_uuid: &str, image_data: Ve
 }
 
 pub fn create_thumbnails(library_uuid: &str, file_uuid: &str, image: DynamicImage){
-    let thumbnail_sizes: Vec<u32> = vec![128,256,512,1024];
+    let thumbnail_sizes: Vec<f32> = vec![128.0,256.0,512.0,1024.0];
 
-    let height_ratio:f32 = 1.6;
+    let height_ratio: f32 = 1.6;
     let path = format!("{}/{}/{}/thumbnails", LIBRARY_DIR.as_str(), library_uuid, file_uuid);
     let path_buf = PathBuf::from(&path);
 
     fs::create_dir_all(&path).unwrap();
-    for thumbnail_size in thumbnail_sizes{
-        let thumbnail = image.thumbnail(thumbnail_size, (thumbnail_size.clone() as f32 * height_ratio.clone()) as u32);
+    for thumbnail_size in thumbnail_sizes.iter(){
+        let thumbnail_height = thumbnail_size * height_ratio.clone();
+        let thumbnail = image.thumbnail(thumbnail_size.clone() as u32, thumbnail_height as u32);
         thumbnail.save(&path_buf.join(format!("{}.jpg", thumbnail_size))).unwrap();
     }
 }
