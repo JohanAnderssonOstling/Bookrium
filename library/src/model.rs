@@ -17,12 +17,12 @@ impl LibraryModel {
 		Self { db: LibraryDBConn::new(uuid), uuid: uuid.to_string() }
 	}
 
-	fn add_file(&self, file: &MediaFile) {
+	fn add_file(&self, file: &Book) {
 		self.db.insert_media(file);
 	}
 
-	pub fn fetch_files(&self) -> Vec<MediaFile> {
-		self.db.fetch_media("root")
+	pub fn fetch_files(&self) -> Vec<Book> {
+		self.db.fetch_books("root")
 	}
 
 	pub fn scan_library(&self, path: &str) {

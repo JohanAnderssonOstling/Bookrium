@@ -16,9 +16,9 @@ pub fn is_filetype(path: &PathBuf) -> bool {
 }
 
 pub fn scan_dir(path: PathBuf) -> (Vec<PathBuf>, Vec<PathBuf>) {
-	fs::read_dir(&path).unwrap()
+	fs::read_dir(path).unwrap()
 			.map(|res| res.unwrap().path())
-			.filter(|path| is_filetype(path))
+			.filter(is_filetype)
 			.partition_map(|path| {
 				if path.is_dir() { Either::Left(path) } else { Either::Right(path) }
 			})

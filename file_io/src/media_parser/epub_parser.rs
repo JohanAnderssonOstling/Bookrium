@@ -1,17 +1,22 @@
 use std::path::Path;
+use pdf::content::Op;
 use rbook::Ebook;
+use rbook::epub::Metadata;
 use rbook::xml::Element;
-use library_types::{MediaFile, Navigation, NavPoint};
+use library_types::*;
+use crate::media_parser::*;
 
-pub fn parse_epub(path: &Path, mut media: MediaFile) -> (MediaFile, Option<Vec<u8>>) {
+type Elems<'a> = Vec<&'a Element>;
+
+pub fn parse_epub(path: &Path, mut media: Book) -> (Book, Cover) {
 	let epub = rbook::Epub::new(path).unwrap();
-	let metadata = epub.metadata();
+	let metadata: &Metadata = epub.metadata();
 
-	let isbn = metadata.unique_identifier().unwrap().value().to_string();
-
-	media.title = metadata.title().unwrap().value().to_string();
-	media.description = metadata.description().unwrap().value().to_string();
-	media.navigation = parse_navigation(&epub);
+	media.title = get_elem(metadata.title());
+	media.desc = get_elem(metadata.description());
+	media.navigation = parse_nav(epub.toc().elements());
+	media.subjects = parse_subjects(metadata.subject());
+	media.identifiers = parse_identifiers(metadata);
 
 	let cover_href = epub.cover_image().unwrap().value();
 	let cover = epub.read_bytes_file(cover_href).ok();
@@ -19,47 +24,48 @@ pub fn parse_epub(path: &Path, mut media: MediaFile) -> (MediaFile, Option<Vec<u
 	(media, cover)
 }
 
-fn parse_navigation(epub: &rbook::Epub) -> Navigation{
-	let toc: Vec<&Element> = epub.toc().elements();
-	Navigation{ nav_points: parse_nav_points(toc)}
+fn get_elem(elem: Option<&Element>) -> String {
+	elem.unwrap().value().to_string()
 }
 
-fn parse_nav_points(elem: Vec<&Element>) -> Vec<NavPoint> {
-	let mut nav_points: Vec<NavPoint> = Vec::new();
-	for item in elem {
-		nav_points.push(NavPoint {
-			name: item.name().to_string(),
-			href: item.value().to_string(),
-			children: parse_nav_points(item.children()),
-		});
-
+fn parse_nav(elems: Elems) -> Vec<Nav>{
+	let mut nav: Vec<Nav> = Vec::new();
+	for item in elems {
+		let childs = parse_nav(item.children());
+		nav.push(Nav::new(item.name(), item.value(), childs));
 	}
-	nav_points
+	nav
 }
 
-//unit tests
 
-#[cfg(test)]
-mod tests {
-	use std::env;
-	use std::path::PathBuf;
-	use rbook::Epub;
-	use super::*;
+fn parse_subjects(elems: Elems) -> Vec<Subject> {
+	let mut subjects: Vec<Subject> = Vec::new();
+	for elem in elems {
+		subjects.push(Subject::new(elem.value()));
+	};
+	subjects
+}
 
-	fn get_epub_path() -> PathBuf {
-		let mut epub_path: PathBuf = env::current_dir().unwrap();
-		epub_path.push("src");
-		epub_path.push("media_parser");
-		epub_path.push("test_files");
-		epub_path.push("Philosophy of Software Design.epub");
-		epub_path
+fn parse_creators(elems: Elems) -> Vec<Creator> {
+	let mut creators: Vec<Creator> = Vec::new();
+	for elem in elems {
+		//creators.push(Creator::new(elem.value()));
+	};
+	creators
+}
+
+
+fn parse_identifiers(meta: &Metadata) -> Vec<Identifier> {
+	let mut identifiers: Vec<Identifier> = Vec::new();
+	for elem in meta.get("identifier") {
+		let val = elem.value().to_string();
+		let identifier = match elem.name().to_lowercase() {
+			id if id.contains("isbn") => Identifier::ISBN(val),
+			id if id.contains("asin") => Identifier::Asin(val),
+			id if id.contains("goog") => Identifier::GOOG(val),
+			_ => Identifier::NoIdentifier,
+		};
+		identifiers.push(identifier);
 	}
-
-	fn setup()  -> Epub {
-		rbook::Epub::new(get_epub_path().as_path()).unwrap()
-	}
-
-
-
-
+	identifiers
 }

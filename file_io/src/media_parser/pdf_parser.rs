@@ -5,7 +5,7 @@ use pdf::primitive::Dictionary;
 use library_types::*;
 
 
-pub fn parse_pdf(path: &Path, mut media: MediaFile) -> (MediaFile, Option<Vec<u8>>) {
+pub fn parse_pdf(path: &Path, mut media: Book) -> (Book, Option<Vec<u8>>) {
     let file = FileOptions::cached().open(path).unwrap();
     let info = file.trailer.info_dict.as_ref().unwrap();
 

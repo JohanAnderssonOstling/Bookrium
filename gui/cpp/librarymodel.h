@@ -10,7 +10,8 @@
 #include "cxx_layer/src/library_cxx.rs.h"
 #include "cxx_layer/src/client_cxx.rs.h"
 
-class LibraryModel : public QAbstractListModel { Q_OBJECT
+class LibraryModel : public QAbstractListModel {
+Q_OBJECT
 
 private:
 		rust::String library_uuid;

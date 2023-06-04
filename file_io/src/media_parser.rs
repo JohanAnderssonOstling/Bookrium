@@ -8,8 +8,10 @@ use epub_parser::*;
 mod pdf_parser;
 mod epub_parser;
 
-pub fn parse_media(path: &Path, parent_uuid: &str) -> (MediaFile, Option<Vec<u8>>) {
-	let media = MediaFile::new(path, parent_uuid);
+type Cover = Option<Vec<u8>>;
+
+pub fn parse_media(path: &Path, parent_uuid: &str) -> (Book, Cover) {
+	let media = Book::new(path, parent_uuid);
 	if path.is_dir() { return (media, None); }
 
 	match path.extension().unwrap().to_str().unwrap() {

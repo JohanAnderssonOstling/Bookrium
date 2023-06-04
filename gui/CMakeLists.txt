@@ -14,8 +14,8 @@ find_package(Corrosion REQUIRED)
 include(corrosion_cxx.cmake)
 
 qt_add_executable(Castafiore
-        cpp/main.cpp cpp/homemodel.cpp cpp/librarymodel.cpp cpp/mediamodel.cpp
-        cpp/homemodel.h cpp/librarymodel.h cpp/rust_util.h cpp/mediamodel.h
+        cpp/main.cpp cpp/homemodel.cpp cpp/librarymodel.cpp
+        cpp/homemodel.h cpp/librarymodel.h cpp/rust_util.h
         qml/main.qml qml/HomeView.qml qml/HomeViewDelegate.qml
         qml/LibraryView.qml qml/LibraryViewDelegate.qml qml/PDFReader.qml qml/EpubReader.qml)
 
