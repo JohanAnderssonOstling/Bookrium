@@ -13,3 +13,5 @@ tokio = { version = "1.27.0", features = ["full"] }
 async-recursion = "1.0.4"
 lazy_static = "1.4.0"
 log = "0.4.14"
+rust-code-analysis = "0.0.25"
+rust-code-analysis-cli = "0.0.25"

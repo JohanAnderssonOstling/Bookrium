@@ -11,7 +11,7 @@ pub fn parse_pdf(path: &Path, mut media: Book) -> (Book, Option<Vec<u8>>) {
 
     let title = get_str_property(info, "Title");
     let isbn = get_str_property(info, "ISBN");
-    media.duration = get_str_property(info, "Pages");
+    media.len = get_str_property(info, "Pages");
 
     let cover = get_cover(&file).ok();
     (media, cover)

@@ -3,10 +3,10 @@ use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq, Default, Clone)]
 pub struct Library {
-	pub uuid: String,
-	pub name: String,
-	pub path: String,
-	pub url: String
+    pub uuid: String,
+    pub name: String,
+    pub path: String,
+    pub url: String
 }
 
 impl Library {

@@ -38,7 +38,7 @@ pub fn convert_img(image_data: Vec<u8>) -> Option<DynamicImage>{
     reader.decode().ok()
 }
 
-pub fn create_thumbnails_raw(library_uuid: &str, file_uuid: &str, image_data: Vec<u8>){
+pub fn create_thumbs(library_uuid: &str, file_uuid: &str, image_data: Vec<u8>){
     let image = convert_img(image_data).unwrap();
     create_thumbnails(library_uuid, file_uuid, image);
 }

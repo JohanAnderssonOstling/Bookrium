@@ -18,16 +18,16 @@ fn open_library(uuid: &str) {
 fn get_media_files(uuid: &str) -> Vec<MediaFile> {
 	let mut library_lock = LIBRARIES.lock().unwrap();
 	let library = library_lock.get_mut(uuid).unwrap();
-	let files = library.fetch_files();
+	let files = library.get_books();
 
 	let mut media_files = Vec::new();
 	for file in files {
 		media_files.push(MediaFile {
 			uuid: file.uuid,
-			path: file.path,
+			path: file.path.to_str().unwrap().to_string(),
 			title: file.title,
 			description: file.desc,
-			navigation: convert_navigation(file.navigation),
+			navigation: convert_navigation(file.contents),
 		});
 	}
 	media_files
@@ -36,19 +36,20 @@ fn get_media_files(uuid: &str) -> Vec<MediaFile> {
 fn scan_library(uuid: &str, path: &str) {
 	let mut library_lock = LIBRARIES.lock().unwrap();
 	let library = library_lock.get_mut(uuid).unwrap();
-	library.scan_library(path);
+	library.scan_lib(path);
 }
 
 fn set_media_position(library_uuid: &str, file_uuid: &str, position: &str) {
 	let mut library_lock = LIBRARIES.lock().unwrap();
 	let library = library_lock.get_mut(library_uuid).unwrap();
-	(library.set_media_position(file_uuid, position));
+	//(library.set_media_position(file_uuid, position));
 }
 
 fn get_media_position(library_uuid: &str, file_uuid: &str) -> String {
 	let mut library_lock = LIBRARIES.lock().unwrap();
 	let library = library_lock.get_mut(library_uuid).unwrap();
-	library.get_media_position(file_uuid)
+	//library.get_media_position(file_uuid)
+  "hfdg".into()
 }
 
 fn has_cover(library_uuid: &str, file_uuid: &str) -> bool {
