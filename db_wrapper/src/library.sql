@@ -31,14 +31,25 @@ JOIN book_dir ON book.uuid = book_dir.book_uuid
 JOIN dir ON book_dir.dir_uuid = dir.dir_uuid
 WHERE dir.dir_uuid = :dir_uuid;
 
+-- name: get_book_file_info?
+-- # Parameters
+-- param: book_uuid: &str
+SELECT book.file_name, book_dir.dir_uuid
+FROM book
+JOIN book_dir ON book.uuid = book_dir.book_uuid
+WHERE book.uuid = :book_uuid LIMIT 1;
+
+
+
+
 -- DIRS
 -- name: insert_dir!
 -- # Parameters
 -- param: dir_uuid: &str
--- param: path: &str
+-- param: name: &str
 -- param: parent_uuid: &str
-INSERT INTO dir (dir_uuid, path, parent_uuid)
-VALUES (:dir_uuid, :path, :parent_uuid);
+INSERT INTO dir (dir_uuid, dir_name, parent_uuid)
+VALUES (:dir_uuid, :name, :parent_uuid);
 
 -- name: get_dirs?
 -- # Parameters
@@ -49,6 +60,11 @@ SELECT dir_uuid FROM dir WHERE dir_uuid = :dir_uuid;
 -- # Parameters
 -- param: test
 DELETE FROM dir;
+
+-- name: select_dir?
+-- # Parameters
+-- param: dir_uuid: &str
+SELECT * FROM dir WHERE dir_uuid = :dir_uuid;
 
 -- name: insert_book_dir!
 -- # Parameters

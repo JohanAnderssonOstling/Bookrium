@@ -68,8 +68,32 @@ impl LibraryDBConn {
     books
   }
 
+  pub fn get_book_path(&self, uuid: &str, library_path: &String) -> String {
+    let mut book_file_name: String = String::new();
+    let mut dir_path: String = String::new();
+    self.db.get_book_file_info(uuid, |row|{
+      book_file_name = row.get(0).unwrap();
+      let dir_uuid: String = row.get(1).unwrap();
+      dir_path = self.get_dir_path(dir_uuid.as_str());
+      Ok(())
+    }).expect("Error getting book file name");
+    format!("{}/{}{}", library_path, dir_path, book_file_name)
+  }
+
+  fn get_dir_path(&self, dir_uuid: &str) -> String {
+	let mut path: String = String::new();
+    self.db.select_dir(dir_uuid, |row| {
+      let name: String = row.get(2).unwrap();
+      let parent_uuid: String = row.get(1).unwrap();
+      if parent_uuid.eq("root") {return Ok(())};
+      path = format!("{}/{}", self.get_dir_path(parent_uuid.as_str()) , name);
+      Ok(())
+    }).expect("Error getting media position");
+    path
+  }
   pub fn set_pos(&self, uuid: &str, pos: &str) {
-    self.db.set_pos(uuid, pos).unwrap(); }
+    self.db.set_pos(uuid, pos).unwrap();
+  }
 
   pub fn get_pos(&self, uuid: &str) -> String {
     let mut position: String = String::new();

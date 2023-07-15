@@ -7,6 +7,12 @@ use crate::media_parser::*;
 
 type Elems<'a> = Vec<&'a Element>;
 
+pub fn get_epub_uuid(path: &Path) -> Option<String> {
+  let epub = rbook::Epub::new(path).unwrap();
+  let meta = epub.metadata();
+  meta.unique_identifier().map(|id| id.value().into())
+}
+
 pub fn parse_epub(path: &Path, parent_dir: &str) -> (ParseBook, Cover) {
   let epub = rbook::Epub::new(path).unwrap();
   let meta = epub.metadata();
