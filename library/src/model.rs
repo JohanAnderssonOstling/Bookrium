@@ -27,6 +27,7 @@ impl LibraryModel {
 
   pub fn scan_lib (&self, path: &str) {
     let scan_path = PathBuf::from(path);
+    self.db.clear_dirs();
     self.scan_lib_aux (scan_path, "root"); }
 
   fn scan_lib_aux (&self, scan_path: PathBuf, parent_uuid: &str) {
@@ -43,10 +44,12 @@ impl LibraryModel {
       let file_name = file.file_name().unwrap().to_str().unwrap();
       let existing_uuid: Option<String> = self.db.get_book_uuid(file_name);
       if let Some(uuid) = existing_uuid {
+	self.db.insert_book_dir(&uuid, parent_uuid);
 	continue;
       }
       let book = parse_book (&file, parent_uuid);
       self.add_book (&book.0);
+      self.db.insert_book_dir(&book.0.book.uuid, parent_uuid);
       if book.1.is_some() {
 	create_thumbs(&self.uuid, &book.0.book.uuid, book.1.unwrap());
       }

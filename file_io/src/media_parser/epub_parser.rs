@@ -14,7 +14,6 @@ pub fn parse_epub(path: &Path, parent_dir: &str) -> (ParseBook, Cover) {
   let book = ParseBook {
     book:	parse_b(meta),
     mdata:	parse_book_mdata(&epub, meta),
-    dir:	parent_dir.into(),
     name:	path.file_name().unwrap().to_str().unwrap().into(),
     authors: 	get_elems(meta.creators()),
     subjects:	get_elems(meta.subject()),

@@ -26,6 +26,15 @@ impl LibraryDBConn {
     }).expect("Error getting folders");
     dirs }
 
+  pub fn clear_dirs(&self) {
+    self.db.execute("DELETE FROM dir", []).unwrap();
+    self.insert_dir("root", "None", "/");
+  }
+
+  pub fn insert_book_dir(&self, book_uuid: &str, dir_uuid: &str) {
+    self.db.insert_book_dir(book_uuid, dir_uuid).unwrap();
+  }
+
   pub fn get_book_uuid(&self, file_name: &str) -> Option<String>{
     let mut uuid: Option<String> = None;
     self.db.select_book_uuid(file_name, |row| {
@@ -41,7 +50,6 @@ impl LibraryDBConn {
       parsed_book.name.as_str(),
       parsed_book.book.progress.clone(),
       parsed_book.mdata.pos.as_str(),
-      parsed_book.dir.as_str(),
       to_string(&parsed_book.mdata.contents).unwrap().as_str(),
       parsed_book.book.title.as_str(),
       parsed_book.mdata.desc.as_str(),
@@ -84,42 +92,3 @@ fn deserialize_book(row: &Row) -> rusqlite::Result<LibBook> {
   })
 }
 
-fn deserialize_media(row: &Row) -> rusqlite::Result<Book> {
-  let path_row: String = row.get(1)?;
-  let path: PathBuf = PathBuf::from(path_row);
-  let nav_json: String = row.get(5)?;
-  //let identifiers_json: String = row.get(8)?;
-  Ok(Book {
-    uuid:  row.get(0)?, 	creators: Vec::new(),
-    path,			subjects: Vec::new(),
-    len:   row.get(2)?,
-    dir:   row.get(4)?, 	contents: from_str(nav_json.as_str()).unwrap(),
-    title: row.get(6)?,
-    desc:  row.get(7)?,
-    ids:   Vec::new(), 		publ: "hello".into(),
-    pos:   row.get(3)?,		publisher:Publisher{ uuid: String::new(), name: String::new() },
-
-  })
-}
-
-/*
-fn deserialize_creators(uuid: &str) -> Creators {
-  let mut creators: Vec<Creator> = Vec::new();
-  self.db.get_book_creators(uuid, |row| {
-    let role: String = row.get(2)?;
-    creators.push(Creator {
-      uuid:row.get(0)?, name:row.get(1)?,
-      role:from_str(role.as_str()).unwrap(), });
-    Ok(())
-  }).expect("Error getting creators");
-  creators }
-
-fn deserialize_subjects(uuid: &str) -> Subjects {
-  let mut subjects: Vec<Subject> = Vec::new();
-  self.db.get_book_subjects(uuid, |row| {
-    subjects.push(Subject {
-      uuid:row.get(0)?, name:row.get(1)?, });
-    Ok(())
-  }).expect("Error getting subjects");
-  subjects }
-*/

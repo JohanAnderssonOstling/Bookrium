@@ -1,3 +1,36 @@
+-- BOOKS
+-- name: select_book_uuid?
+-- # Parameters
+-- param: file_name: &str
+SELECT uuid FROM book WHERE file_name = :file_name;
+
+
+--name: insert_book!
+--# Parameters
+--param: uuid: &str
+--param: file_name: &str
+--param: progress: u8
+--param: position: &str
+--param: navigation: &str
+--param: title: &str
+--param: desc: &str
+--param: identifiers: &str
+--param: published: u32
+INSERT INTO book
+( uuid, file_name, progress, position, navigation,
+  title, desc, identifiers,published)
+VALUES
+  (:uuid,:file_name,:progress,:position,:navigation,
+   :title,:desc,:identifiers,:published);
+
+-- name: get_books?
+-- # Parameters
+-- param: dir_uuid: &str
+SELECT book.uuid, book.title, book.progress FROM book
+JOIN book_dir ON book.uuid = book_dir.book_uuid
+JOIN dir ON book_dir.dir_uuid = dir.dir_uuid
+WHERE dir.dir_uuid = :dir_uuid;
+
 -- DIRS
 -- name: insert_dir!
 -- # Parameters
@@ -12,36 +45,17 @@ VALUES (:dir_uuid, :path, :parent_uuid);
 -- param: dir_uuid: &str
 SELECT dir_uuid FROM dir WHERE dir_uuid = :dir_uuid;
 
--- BOOKS
--- name: select_book_uuid?
+-- name: clear_dirs!
 -- # Parameters
--- param: file_name: &str
-SELECT uuid FROM book WHERE file_name = :file_name;
+-- param: test
+DELETE FROM dir;
 
-
---name: insert_book!
---# Parameters
---param: uuid: &str
---param: file_name: &str
---param: progress: u8
---param: position: &str
---param: dir_uuid: &str
---param: navigation: &str
---param: title: &str
---param: desc: &str
---param: identifiers: &str
---param: published: u32
-INSERT INTO book
-( uuid, file_name, progress, position, dir_uuid, navigation,
-  title, desc, identifiers,published)
-VALUES
-(:uuid,:file_name,:progress,:position,:dir_uuid,:navigation,
- :title,:desc,:identifiers,:published);
-
--- name: get_books?
+-- name: insert_book_dir!
 -- # Parameters
+-- param: book_uuid: &str
 -- param: dir_uuid: &str
-SELECT uuid, title, progress FROM book WHERE dir_uuid = :dir_uuid;
+INSERT INTO book_dir (book_uuid, dir_uuid) VALUES (:book_uuid, :dir_uuid);
+
 
 -- CREATORS
 -- name: select_creator_uuid?
@@ -90,7 +104,8 @@ WHERE book.uuid = :book_uuid;
 
 -- name: set_pos!
 -- # Parameters
--- param: uuid: &str	-- param: position: &str
+-- param: uuid: &str
+-- param: position: &str
 UPDATE book SET position = :position WHERE uuid = :uuid;
 
 --name: get_pos?

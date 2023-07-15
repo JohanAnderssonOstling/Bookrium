@@ -37,7 +37,7 @@ stru!(BookRel{	authors:Authors,subjects:Subjects,
   publisher:Publisher,});
 
 stru!(ParseBook{
-  book:LibBook,	mdata:BookMData,dir:String,	authors:Vec<String>,
+  book:LibBook,	mdata:BookMData,	authors:Vec<String>,
   name:String,	subjects:Vec<String>,	publisher:Vec<String>,});
 
 stru!(Publisher{uuid:String,	name:String, 	});
