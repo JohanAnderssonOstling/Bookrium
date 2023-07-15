@@ -14,9 +14,9 @@ impl LibraryDBConn {
     let db = rusqlite::Connection::open("/home/johan/.local/share/media_library/libraries/test/library.db").unwrap();
     Self { db } }
 
-  pub fn insert_dir(&self, dir: &Dir) {
-    self.db.insert_dir(
-      dir.uuid.as_str(), dir.path.as_str(), dir.prev.as_str()).unwrap(); }
+  pub fn insert_dir(&self, uuid: &str, path: &str, parent: &str) {
+    self.db.insert_dir(uuid, path, parent).unwrap();
+  }
 
   pub fn get_dirs(&self, parent_dir_uuid: &str) -> Dirs {
     let mut dirs: Vec<Dir> = Vec::new();
@@ -26,24 +26,39 @@ impl LibraryDBConn {
     }).expect("Error getting folders");
     dirs }
 
-  pub fn add_book(&self, book: &Book) {
+  pub fn get_book_uuid(&self, file_name: &str) -> Option<String>{
+    let mut uuid: Option<String> = None;
+    self.db.select_book_uuid(file_name, |row| {
+      let u:String = row.get(0).unwrap();
+      uuid = Some(u);
+      Ok(())
+    }).expect("get_book_uuid error");
+    uuid
+  }
+  pub fn insert_book(&self, parsed_book: &ParseBook) {
     self.db.insert_book(
-      book.uuid.as_str(),		book.path.to_str().unwrap(),
-      book.len.as_str(), 		book.pos.as_str(),
-      book.dir.as_str(),
-      to_string(&book.contents).unwrap().as_str(),
-      book.title.as_str(), 		book.desc.as_str(),
-      to_string(&book.ids).unwrap().as_str()
-    ).unwrap(); }
+      parsed_book.book.uuid.as_str(),
+      parsed_book.name.as_str(),
+      parsed_book.book.progress.clone(),
+      parsed_book.mdata.pos.as_str(),
+      parsed_book.dir.as_str(),
+      to_string(&parsed_book.mdata.contents).unwrap().as_str(),
+      parsed_book.book.title.as_str(),
+      parsed_book.mdata.desc.as_str(),
+      to_string(&parsed_book.mdata.ids).unwrap().as_str(),
+      parsed_book.mdata.publ.clone(),
+    ).unwrap();
+  }
 
   pub fn get_books(&self, dir_uuid: &str) -> Books {
-    let mut media: Vec<Book> = Vec::new();
+    let mut books: Books = Vec::new();
     self.db.get_books(dir_uuid, |row| {
-      let book = deserialize_media(row).unwrap();
-      media.push(book);
+      let book = deserialize_book(row).unwrap();
+      books.push(book);
       Ok(())
     }).expect("Error getting media");
-    media }
+    books
+  }
 
   pub fn set_pos(&self, uuid: &str, pos: &str) {
     self.db.set_pos(uuid, pos).unwrap(); }
@@ -54,12 +69,20 @@ impl LibraryDBConn {
       position = row.get(0).unwrap();
       Ok(())
     }).expect("Error getting media position");
-    position }
+    position
+  }
 }
-
 
 fn deserialize_dir(row: &Row) -> rusqlite::Result<Dir> {
   Ok(Dir {uuid:row.get(0)?, path:row.get(1)?, prev:row.get(2)?} )}
+
+fn deserialize_book(row: &Row) -> rusqlite::Result<LibBook> {
+  Ok(LibBook {
+    uuid:row.get(0).unwrap(),
+    title:row.get(1).unwrap(),
+    progress:row.get(2).unwrap(),
+  })
+}
 
 fn deserialize_media(row: &Row) -> rusqlite::Result<Book> {
   let path_row: String = row.get(1)?;
@@ -73,10 +96,11 @@ fn deserialize_media(row: &Row) -> rusqlite::Result<Book> {
     dir:   row.get(4)?, 	contents: from_str(nav_json.as_str()).unwrap(),
     title: row.get(6)?,
     desc:  row.get(7)?,
-    ids:   Vec::new(), 		publ:100,
+    ids:   Vec::new(), 		publ: "hello".into(),
     pos:   row.get(3)?,		publisher:Publisher{ uuid: String::new(), name: String::new() },
 
-  }) }
+  })
+}
 
 /*
 fn deserialize_creators(uuid: &str) -> Creators {

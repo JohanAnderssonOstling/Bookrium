@@ -20,19 +20,13 @@ void LibraryModel::openLibrary(const QString &uuid, const QString &path) {
 	updateMediaFiles();
 }
 
-QString get_media_name(const MediaFile &mediaFile) {
-	QString title = asQStr(mediaFile.title);
-	if (title.isEmpty()) title = asQStr(mediaFile.path).split("/").last();
-	return title;
-}
 
 QVariant LibraryModel::data(const QModelIndex &index, int role) const {
 	const MediaFile mediaFile = media_files.at(index.row());
 
 	switch (role) {
 		case UUIDRole: return asQStr(mediaFile.uuid);
-		case PathRole: return asQStr(mediaFile.path);
-		case NameRole: return get_media_name(mediaFile);
+		case NameRole: return asQStr(mediaFile.title);
 		case HasCoverRole: return has_cover(this->library_uuid, mediaFile.uuid);
 		case CoverRole:
 			return asQStr(get_cover_path(this->library_uuid, mediaFile.uuid));
@@ -49,7 +43,6 @@ int LibraryModel::columnCount(const QModelIndex &parent) const { return 1; }
 QHash<int, QByteArray> LibraryModel::roleNames() const {
 	return {{UUIDRole, "uuid"},
 					{NameRole, "name"},
-					{PathRole, "path"},
 					{HasCoverRole, "hasCover"},
 					{CoverRole, "cover"}};
 }

@@ -9,7 +9,6 @@ edition = "2021"
 library_types = { path = "../library_types" }
 db_wrapper = { path = "../db_wrapper" }
 file_io = { path = "../file_io" }
-server = { path = "../server" }
 
 lazy_static = "1.4.0"
 dirs = "5.0.0"

@@ -17,19 +17,32 @@ macro_rules! en {
             #[default] $($variant),*} } }
 
 
-pub type Books 	 = Vec<Book>; 		pub type Contents = Vec<Nav>;
+pub type Books 	 = Vec<LibBook>; 		pub type Contents = Vec<Nav>;
 pub type IDs 	 = Vec<Identifier>; 	pub type Dirs 	  = Vec<Dir>;
 pub type Subjects= Vec<Subject>;	pub type Creators = Vec<Creator>;
-
+pub type Authors = Vec<Author>;
 stru!(Book {
   uuid:String,	ids:  IDs,	publisher:Publisher,
   desc:String,	len:  String,	subjects: Subjects,
-  path:PathBuf,	publ: u32,	creators: Creators,
+  path:PathBuf,	publ: String,	creators: Creators,
   pos: String,	title:String,	contents: Contents,
   dir: String, });
 
+stru!(LibBook {	uuid:String,	title:String,	progress:u8,	});
+
+stru!(BookMData{desc:String,	pos:String,	contents:Contents,
+  publ:u32,	ids:IDs,});
+
+stru!(BookRel{	authors:Authors,subjects:Subjects,
+  publisher:Publisher,});
+
+stru!(ParseBook{
+  book:LibBook,	mdata:BookMData,dir:String,	authors:Vec<String>,
+  name:String,	subjects:Vec<String>,	publisher:Vec<String>,});
+
 stru!(Publisher{uuid:String,	name:String, 	});
 stru!(Subject{	uuid:String,	name:String, 	});
+stru!(Author {	uuid:String,	name:String,});
 stru!(Creator{	uuid:String,	name:String,	role:CreatorRole,});
 stru!(Nav{	name:String,	href:String,   	childs:Vec<Nav>,});
 

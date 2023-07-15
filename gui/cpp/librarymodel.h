@@ -21,7 +21,6 @@ public:
 		enum Roles {
 				UUIDRole = Qt::UserRole,
 				NameRole,
-				PathRole,
 				HasCoverRole,
 				CoverRole
 		};
