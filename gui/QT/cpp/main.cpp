@@ -6,10 +6,9 @@
 int main(int argc, char* argv[])
 {
     QGuiApplication app(argc, argv);
-
     QQmlApplicationEngine engine;
     HomeModel homeModel;
-    engine.rootContext()->setContextProperty("HomeModel", &homeModel);
+    QCoreApplication::setAttribute(Qt::AA_UseSoftwareOpenGL);    engine.rootContext()->setContextProperty("HomeModel", &homeModel);
     qmlRegisterType<LibraryModel>("johandost.LibraryModel", 1, 0, "LibraryModel");
 
     const QUrl url(QStringLiteral("../qml/main.qml"));

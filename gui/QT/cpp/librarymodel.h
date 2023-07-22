@@ -14,25 +14,33 @@ Q_OBJECT
 private:
     rust::String library_uuid;
     rust::String library_path;
-    rust::Vec<CXXBook> media_files;
+    rust::Vec<CXXBook> books;
+    rust::Vec<Dir> dirs;
+    QStack<Dir> dir_stack;
+
+    QVariant bookData(int row, int role) const;
+    QVariant dirData(int row, int role) const;
+
 public:
     enum Roles {
-	UUIDRole = Qt::UserRole,
-	NameRole,
-	PathRole,
-	HasCoverRole,
-	CoverRole
+	UUID = Qt::UserRole,
+	Name,
+	Path,
+	HasCover,
+	Cover
     };
+
     explicit LibraryModel(QObject *parent = 0);
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    [[nodiscard]] QVariant
-    data(const QModelIndex &index, int role) const override;
-    [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
 public slots:
     void scanLibrary();
     void updateMediaFiles();
     void openLibrary(const QString &path, const QString &uuid);
     void setMediaPosition(const QString &uuid, const QString &location);
     QString getMediaPosition(const QString &uuid);
+    void enterDir(int index);
+    bool prevDir();
 };

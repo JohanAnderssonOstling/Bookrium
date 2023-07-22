@@ -15,10 +15,10 @@ cxx = "1.0.83"
 lazy_static = "1.4.0"
 tokio = "1.28.0"
 
-client = { path = "../../../client" }
-library = { path = "../../../library" }
-library_types = { path = "../../../library_types" }
-file_io = { path = "../../../file_io" }
+client          = { path = "../../../../client" }
+library         = { path = "../../../../library" }
+library_types   = { path = "../../../../library_types" }
+file_io         = { path = "../../../../file_io" }
 
 [build-dependencies]
 cxx-build = "1.0.83"

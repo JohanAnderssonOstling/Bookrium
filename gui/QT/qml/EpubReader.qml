@@ -5,16 +5,14 @@ import QtQuick.Layouts 1.3
 ColumnLayout{
 	property bool showAddButton: false
 	property bool showBackButton: true
-	property string readerUrl
 	property string bookUrl
 	property string epubCfi
 	property string bookUUID;
-	property string bookPath;
+
 
 	function loadEpub(bookPath, bookUUID){
-		this.bookPath = bookPath;
 		this.bookUUID = bookUUID;
-		this.bookUrl = "file://" + bookPath;		
+		this.bookUrl = "file://" + bookPath;
 	}
 
 	function backButtonPressed(){
@@ -32,18 +30,16 @@ ColumnLayout{
 		onLoadingChanged: {
 			if (loadRequest.status !== WebView.LoadSucceededStatus) return;
 			let init_cfi = libraryModel.getMediaPosition(bookUUID);
+			console.log("Loading book: " + bookUrl + " with cfi: " + init_cfi);
 			epubWebView.runJavaScript("loadBook(\"" + bookUrl + "\", \"" + init_cfi + "\");");			//let function_call = "set_cfi(\"" + init_cfi + "\");"
-			//epubWebView.runJavaScript(function_call);
 		}
 
 		Keys.onRightPressed: {
-			console.log("Right pressed");
-			if (event.modifiers & Qt.ControlModifier) epubWebView.runJavaScript("nextChapter();");
-			else epubWebView.runJavaScript("nextPage();", function(result) {
-				console.log(Result);
-			});
+			if (event.modifiers && Qt.ControlModifier) epubWebView.runJavaScript("nextChapter();");
+			else epubWebView.runJavaScript("nextPage();");
 			event.accepted = true;
 		}
+
 		Keys.onLeftPressed: {
 			if (event.modifiers & Qt.ControlModifier) epubWebView.runJavaScript("prevChapter();");
 			else epubWebView.runJavaScript("prevPage()");
