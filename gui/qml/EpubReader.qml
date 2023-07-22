@@ -9,7 +9,13 @@ ColumnLayout{
 	property string bookUrl
 	property string epubCfi
 	property string bookUUID;
-	property string title
+	property string bookPath;
+
+	function loadEpub(bookPath, bookUUID){
+		this.bookPath = bookPath;
+		this.bookUUID = bookUUID;
+		this.bookUrl = "file://" + bookPath;		
+	}
 
 	function backButtonPressed(){
 		epubWebView.runJavaScript("get_cfi();", function(epubCfi){
@@ -24,14 +30,18 @@ ColumnLayout{
 		url: "file:///home/johan/CLionProjects/OSPP_Project/gui/qml/web/epubreader.html"
 
 		onLoadingChanged: {
+			if (loadRequest.status !== WebView.LoadSucceededStatus) return;
 			let init_cfi = libraryModel.getMediaPosition(bookUUID);
-			let function_call = "set_cfi(\"" + init_cfi + "\");"
-			epubWebView.runJavaScript(function_call);
+			epubWebView.runJavaScript("loadBook(\"" + bookUrl + "\", \"" + init_cfi + "\");");			//let function_call = "set_cfi(\"" + init_cfi + "\");"
+			//epubWebView.runJavaScript(function_call);
 		}
 
 		Keys.onRightPressed: {
+			console.log("Right pressed");
 			if (event.modifiers & Qt.ControlModifier) epubWebView.runJavaScript("nextChapter();");
-			else epubWebView.runJavaScript("nextPage();");
+			else epubWebView.runJavaScript("nextPage();", function(result) {
+				console.log(Result);
+			});
 			event.accepted = true;
 		}
 		Keys.onLeftPressed: {

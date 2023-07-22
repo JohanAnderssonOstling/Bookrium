@@ -10,15 +10,14 @@
 #include "rust/cxx.h"
 #include "cxx_layer/src/client_cxx.rs.h"
 class HomeModel : public QAbstractListModel {
-    Q_OBJECT
+Q_OBJECT
 private:
-
     rust::Vec<Library> libraries;
 public:
     enum Roles {
-        UuidRole = Qt::UserRole,
-        NameRole,
-        PathRole,
+	UuidRole = Qt::UserRole,
+	NameRole,
+	PathRole,
     };
 
     HomeModel(QObject* parent = nullptr);
@@ -33,6 +32,5 @@ public slots:
     void createLibrary(const QString& name);
     void openLibrary(int row);
     void deleteLibrary(int row);
-
 };
 

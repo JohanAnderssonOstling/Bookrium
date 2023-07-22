@@ -1,17 +1,3 @@
--- DIRS
--- name: insert_dir!
--- # Parameters
--- param: dir_uuid: &str
--- param: path: &str
--- param: parent_uuid: &str
-INSERT INTO dir (dir_uuid, path, parent_uuid)
-VALUES (:dir_uuid, :path, :parent_uuid);
-
--- name: get_dirs?
--- # Parameters
--- param: dir_uuid: &str
-SELECT dir_uuid FROM dir WHERE dir_uuid = :dir_uuid;
-
 -- BOOKS
 -- name: select_book_uuid?
 -- # Parameters
@@ -25,23 +11,67 @@ SELECT uuid FROM book WHERE file_name = :file_name;
 --param: file_name: &str
 --param: progress: u8
 --param: position: &str
---param: dir_uuid: &str
 --param: navigation: &str
 --param: title: &str
 --param: desc: &str
 --param: identifiers: &str
 --param: published: u32
 INSERT INTO book
-( uuid, file_name, progress, position, dir_uuid, navigation,
+( uuid, file_name, progress, position, navigation,
   title, desc, identifiers,published)
 VALUES
-(:uuid,:file_name,:progress,:position,:dir_uuid,:navigation,
- :title,:desc,:identifiers,:published);
+  (:uuid,:file_name,:progress,:position,:navigation,
+   :title,:desc,:identifiers,:published);
 
 -- name: get_books?
 -- # Parameters
 -- param: dir_uuid: &str
-SELECT uuid, title, progress FROM book WHERE dir_uuid = :dir_uuid;
+SELECT book.uuid, book.title, book.progress FROM book
+JOIN book_dir ON book.uuid = book_dir.book_uuid
+JOIN dir ON book_dir.dir_uuid = dir.dir_uuid
+WHERE dir.dir_uuid = :dir_uuid;
+
+-- name: get_book_file_info?
+-- # Parameters
+-- param: book_uuid: &str
+SELECT book.file_name, book_dir.dir_uuid
+FROM book
+JOIN book_dir ON book.uuid = book_dir.book_uuid
+WHERE book.uuid = :book_uuid LIMIT 1;
+
+
+
+
+-- DIRS
+-- name: insert_dir!
+-- # Parameters
+-- param: dir_uuid: &str
+-- param: name: &str
+-- param: parent_uuid: &str
+INSERT INTO dir (dir_uuid, dir_name, parent_uuid)
+VALUES (:dir_uuid, :name, :parent_uuid);
+
+-- name: get_dirs?
+-- # Parameters
+-- param: dir_uuid: &str
+SELECT dir_uuid FROM dir WHERE dir_uuid = :dir_uuid;
+
+-- name: clear_dirs!
+-- # Parameters
+-- param: test
+DELETE FROM dir;
+
+-- name: select_dir?
+-- # Parameters
+-- param: dir_uuid: &str
+SELECT * FROM dir WHERE dir_uuid = :dir_uuid;
+
+-- name: insert_book_dir!
+-- # Parameters
+-- param: book_uuid: &str
+-- param: dir_uuid: &str
+INSERT INTO book_dir (book_uuid, dir_uuid) VALUES (:book_uuid, :dir_uuid);
+
 
 -- CREATORS
 -- name: select_creator_uuid?
@@ -90,7 +120,8 @@ WHERE book.uuid = :book_uuid;
 
 -- name: set_pos!
 -- # Parameters
--- param: uuid: &str	-- param: position: &str
+-- param: uuid: &str
+-- param: position: &str
 UPDATE book SET position = :position WHERE uuid = :uuid;
 
 --name: get_pos?

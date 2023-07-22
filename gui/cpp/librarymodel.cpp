@@ -13,60 +13,61 @@ LibraryModel::LibraryModel(QObject *parent) : QAbstractListModel(parent) {
 }
 
 void LibraryModel::openLibrary(const QString &uuid, const QString &path) {
-	this->library_path = asRustStr(path);
-	this->library_uuid = asRustStr(uuid);
+  this->library_path = asRustStr(path);
+  this->library_uuid = asRustStr(uuid);
 
-	open_library(this->library_uuid);
-	updateMediaFiles();
+  open_library(this->library_uuid, this->library_path);
+  updateMediaFiles();
 }
 
 
 QVariant LibraryModel::data(const QModelIndex &index, int role) const {
-	const MediaFile mediaFile = media_files.at(index.row());
+  const CXXBook book = media_files.at(index.row());
 
-	switch (role) {
-		case UUIDRole: return asQStr(mediaFile.uuid);
-		case NameRole: return asQStr(mediaFile.title);
-		case HasCoverRole: return has_cover(this->library_uuid, mediaFile.uuid);
-		case CoverRole:
-			return asQStr(get_cover_path(this->library_uuid, mediaFile.uuid));
-	}
+  switch (role) {
+    case UUIDRole: return asQStr(book.uuid);
+    case NameRole: return asQStr(book.title);
+    case PathRole: return asQStr(get_book_path(this->library_uuid, book.uuid));
+    case HasCoverRole: return has_cover(this->library_uuid, book.uuid);
+    case CoverRole:
+      return asQStr(get_cover_path(this->library_uuid, book.uuid));
+  }
 }
 
 
 int LibraryModel::rowCount(const QModelIndex &parent) const {
-	return this->media_files.size();
+  return this->media_files.size();
 }
 
 int LibraryModel::columnCount(const QModelIndex &parent) const { return 1; }
 
 QHash<int, QByteArray> LibraryModel::roleNames() const {
-	return {{UUIDRole, "uuid"},
-					{NameRole, "name"},
-					{HasCoverRole, "hasCover"},
-					{CoverRole, "cover"}};
+  return {{UUIDRole, "uuid"},
+	  {NameRole, "name"},
+	  {PathRole, "path"},
+	  {HasCoverRole, "hasCover"},
+	  {CoverRole, "cover"}};
 }
 
 void LibraryModel::scanLibrary() {
-	scan_library(this->library_uuid, this->library_path);
-	updateMediaFiles();
+  scan_library(this->library_uuid, this->library_path);
+  updateMediaFiles();
 }
 
 void LibraryModel::updateMediaFiles() {
-	beginResetModel();
-	this->media_files = get_media_files(this->library_uuid);
-	endResetModel();
+  beginResetModel();
+  this->media_files = get_media_files(this->library_uuid);
+  endResetModel();
 }
 
-void
-LibraryModel::setMediaPosition(const QString &uuid, const QString &location) {
-	qInfo() << "setMediaPosition" << uuid << location;
-	set_media_position(this->library_uuid, asRustStr(uuid), asRustStr(location));
+void LibraryModel::setMediaPosition(const QString &uuid, const QString &location) {
+  qInfo() << "setMediaPosition" << uuid << location;
+  set_media_position(this->library_uuid, asRustStr(uuid), asRustStr(location));
 }
 
 QString LibraryModel::getMediaPosition(const QString &uuid) {
-	QString pos = asQStr(get_media_position(this->library_uuid, asRustStr(uuid)));
-	qInfo() << "getMediaPosition" << uuid << pos;
-	return pos;
+  QString pos = asQStr(get_media_position(this->library_uuid, asRustStr(uuid)));
+  qInfo() << "getMediaPosition" << uuid << pos;
+  return pos;
 }
 
