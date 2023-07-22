@@ -15,10 +15,10 @@ fn open_library(uuid: &str, path: &str) {
   library.insert(uuid.to_string(), LibraryModel::open(uuid, path));
 }
 
-fn get_media_files(uuid: &str) -> Vec<CXXBook> {
+fn get_media_files(uuid: &str, folder_uuid: &str) -> Vec<CXXBook> {
   let mut library_lock = LIBRARIES.lock().unwrap();
   let library = library_lock.get_mut(uuid).unwrap();
-  let files = library.get_books();
+  let files = library.get_books(folder_uuid);
   let mut media_files = Vec::new();
 
   for file in files {
@@ -47,7 +47,6 @@ fn get_media_position(library_uuid: &str, file_uuid: &str) -> String {
   let mut library_lock = LIBRARIES.lock().unwrap();
   let library = library_lock.get_mut(library_uuid).unwrap();
   library.get_pos(file_uuid)
-
 }
 
 fn has_cover(library_uuid: &str, file_uuid: &str) -> bool {
@@ -59,23 +58,29 @@ fn get_cover_path(library_uuid: &str, file_uuid: &str) -> String {
 }
 
 fn convert_navigation(nav: Vec<Nav>) -> Vec<Navigation> {
-  let mut nav_points_ffi = Vec::new();
-  for nav_point in nav {
-    nav_points_ffi.push(Navigation {
-      name: nav_point.name,
-      href: nav_point.href,
-      childs: convert_navigation(nav_point.childs),
-    });
-  }
-  nav_points_ffi
+  nav.into_iter().map(|nav_point| Navigation {
+    name: nav_point.name,
+    href: nav_point.href,
+    childs: convert_navigation(nav_point.childs),
+  }).collect()
+}
+
+fn convert_dir(dirs: Vec<library_types::Dir>) -> Vec<Dir> {
+  dirs.into_iter().map(|dir| Dir {
+    uuid:dir.uuid, name:dir.name, parent:dir.parent,
+  }).collect()
+}
+
+fn get_dirs(library_uuid: &str, parent_uuid: &str) -> Vec<Dir> {
+  let mut library_lock = LIBRARIES.lock().unwrap();
+  let library = library_lock.get_mut(library_uuid).unwrap();
+  convert_dir(library.get_dirs(parent_uuid))
 }
 
 fn get_book_path(uuid: &str, book_uuid: &str) -> String {
   let mut library_lock = LIBRARIES.lock().unwrap();
   let library = library_lock.get_mut(uuid).unwrap();
-  let path = library.get_book_path(book_uuid);
-  println!("path: {} for uuid {}", path, book_uuid);
-  path
+  library.get_book_path(book_uuid)
 }
 
 #[cxx::bridge]
@@ -92,8 +97,15 @@ mod library_ffi {
     pub childs: Vec<Navigation>,
   }
 
+  pub struct Dir {
+    pub uuid: String,
+    pub name: String,
+    pub parent: String,
+  }
+
   extern "Rust" {
-    fn get_media_files(uuid: &str) -> Vec<CXXBook>;
+    fn get_media_files(uuid: &str, folder_uuid: &str) -> Vec<CXXBook>;
+    fn get_dirs(library_uuid: &str, parent_uuid: &str) -> Vec<Dir>;
     fn scan_library(uuid: &str, path: &str);
     fn open_library(uuid: &str, path: &str);
     fn get_book_path(library_uuid: &str, book_uuid: &str) -> String;

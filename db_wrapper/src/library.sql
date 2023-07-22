@@ -1,31 +1,36 @@
--- BOOKS
+-- BOOKS -------------------------------------------------------
 -- name: select_book_uuid?
 -- # Parameters
 -- param: file_name: &str
 SELECT uuid FROM book WHERE file_name = :file_name;
 
+-- name: select_book?
+-- # Parameters
+-- param: uuid: &str
+SELECT uuid FROM book WHERE uuid = :uuid;
 
---name: insert_book!
+--name: 	insert_book!
 --# Parameters
---param: uuid: &str
---param: file_name: &str
---param: progress: u8
---param: position: &str
---param: navigation: &str
---param: title: &str
---param: desc: &str
---param: identifiers: &str
---param: published: u32
+--param: 	uuid: 		&str
+--param: 	file_name: 	&str
+--param: 	progress: 	u8
+--param: 	position: 	&str
+--param: 	navigation: 	&str
+--param: 	title: 		&str
+--param: 	desc: 		&str
+--param: 	identifiers: 	&str
+--param: 	published: 	u32
+--param: 	scan_timestamp: u64
 INSERT INTO book
-( uuid, file_name, progress, position, navigation,
-  title, desc, identifiers,published)
+  ( uuid, file_name, progress, position, navigation,
+    title, desc, identifiers, published, scan_timestamp)
 VALUES
   (:uuid,:file_name,:progress,:position,:navigation,
-   :title,:desc,:identifiers,:published);
+   :title,:desc,:identifiers,:published,:scan_timestamp);
 
--- name: get_books?
--- # Parameters
--- param: dir_uuid: &str
+-- name: 	get_books?
+--#Parameters
+-- param: 	dir_uuid: 	&str
 SELECT book.uuid, book.title, book.progress FROM book
 JOIN book_dir ON book.uuid = book_dir.book_uuid
 JOIN dir ON book_dir.dir_uuid = dir.dir_uuid
@@ -39,22 +44,19 @@ FROM book
 JOIN book_dir ON book.uuid = book_dir.book_uuid
 WHERE book.uuid = :book_uuid LIMIT 1;
 
+-- DIRS --------------------------------------------------------
 
-
-
--- DIRS
 -- name: insert_dir!
--- # Parameters
--- param: dir_uuid: &str
--- param: name: &str
--- param: parent_uuid: &str
-INSERT INTO dir (dir_uuid, dir_name, parent_uuid)
-VALUES (:dir_uuid, :name, :parent_uuid);
+-- param: dir_uuid: 	&str
+-- param: name: 	&str
+-- param: parent_uuid: 	&str
+INSERT INTO dir ( dir_uuid, dir_name, parent_uuid)
+VALUES 		(:dir_uuid,:name,:parent_uuid);
 
 -- name: get_dirs?
 -- # Parameters
 -- param: dir_uuid: &str
-SELECT dir_uuid FROM dir WHERE dir_uuid = :dir_uuid;
+SELECT dir_uuid, dir_name, parent_uuid FROM dir WHERE parent_uuid = :dir_uuid;
 
 -- name: clear_dirs!
 -- # Parameters
@@ -70,12 +72,12 @@ SELECT * FROM dir WHERE dir_uuid = :dir_uuid;
 -- # Parameters
 -- param: book_uuid: &str
 -- param: dir_uuid: &str
-INSERT INTO book_dir (book_uuid, dir_uuid) VALUES (:book_uuid, :dir_uuid);
+INSERT INTO book_dir 	( book_uuid, dir_uuid)
+VALUES 			(:book_uuid,:dir_uuid);
 
+-- CREATORS ----------------------------------------------------
 
--- CREATORS
 -- name: select_creator_uuid?
--- # Parameters
 -- param: creator_name: &str
 SELECT uuid FROM creator WHERE :creator_name = ?;
 
@@ -85,18 +87,16 @@ SELECT uuid FROM creator WHERE :creator_name = ?;
 -- param: name: &str
 INSERT INTO creator (uuid, name) VALUES (:uuid, :name);
 
-
-
 -- name: get_creators?
 -- # Parameters
 -- param: book_uuid: &str
 SELECT creator.uuid, creator.name, book_creator.type FROM creator
-JOIN book_creator 	ON creator.uuid = book_creator.creator_uuid
+JOIN book_creator ON creator.uuid = book_creator.creator_uuid
 JOIN book ON book_creator.book_uuid = book.uuid
 WHERE book.uuid = :book_uuid;
 
 
--- SUBJECTS
+-- SUBJECTS ----------------------------------------------------
 -- name: select_subject_uuid?
 -- # Parameters
 -- param: subject_name: &str
@@ -112,10 +112,9 @@ INSERT INTO subject (uuid, name) VALUES (:uuid, :name);
 -- # Parameters
 -- param: book_uuid: &str
 SELECT subject.uuid, subject.name FROM subject
-JOIN book_subject ON subject.uuid = book_subject.subject_uuid
+  JOIN book_subject ON subject.uuid = book_subject.subject_uuid
 JOIN book ON book_subject.book_uuid = book.uuid
 WHERE book.uuid = :book_uuid;
-
 
 
 -- name: set_pos!
