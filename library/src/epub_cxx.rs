@@ -13,6 +13,8 @@ mod ffi {
     extern "Rust" {
 	fn open_epub(path: &str) -> String;
 	fn next_chapter(uuid: &str);
+        fn prev_chapter(uuid: &str);
+        fn go_to(uuid: &str, href: &str);
 
 	fn get_text(uuid: &str) -> String;
 	fn add_paragraph(uuid: &str) -> String;
@@ -38,6 +40,18 @@ fn next_chapter(uuid: &str) {
     let mut epubs = EPUBS.lock().unwrap();
     let epub = epubs.get_mut(uuid).unwrap();
     epub.next_chapter();
+}
+
+fn prev_chapter(uuid: &str) {
+    let mut epubs = EPUBS.lock().unwrap();
+    let epub = epubs.get_mut(uuid).unwrap();
+    epub.prev_chapter();
+}
+
+fn go_to (uuid: &str, href: &str) {
+    let mut epubs = EPUBS.lock().unwrap();
+    let epub = epubs.get_mut(uuid).unwrap();
+    epub.go_to(href);
 }
 
 fn get_text (uuid: &str) -> String {

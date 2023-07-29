@@ -21,10 +21,34 @@ impl Epub {
 	}
     }
 
+    pub fn go_to (&mut self, href: &str) {
+	let page = href.split("#").collect::<Vec<&str>>()[0];
+	let id = href.split("#").collect::<Vec<&str>>()[1];
+	let epub = rbook::Epub::new(&self.path).unwrap();
+	let mut reader = epub.reader();
+	println!("page: {}", page);
+
+	reader.set_current_page_str(format!("text/{}", page).as_str()).unwrap().unwrap();
+	self.chapter_index = reader.current_index();
+	self.paragraph_index = 0;
+	self.end_paragraph_index = 0;
+	self.current_text = parse_paragraphs(reader);
+	for (i, paragraph) in self.current_text.iter().enumerate() {
+	    if paragraph.contains(format!("id=\"{}\"", id).as_str()) {
+		self.paragraph_index = i;
+		self.end_paragraph_index = i;
+	    }
+	}
+    }
+
+
     pub fn next_chapter(&mut self) {
 
 	let epub = rbook::Epub::new(&self.path).unwrap();
 	let mut reader = epub.reader();
+	if (reader.page_count() - 1) == self.chapter_index {
+	    return
+	}
 
 	self.chapter_index 	+= 1;
 	self.paragraph_index 	= 0;
@@ -63,6 +87,7 @@ impl Epub {
 
     fn get_paragraph(&self, index: usize) -> String {
 	let paragraph = self.current_text[index].clone();
+	todo!()
     }
 
     pub fn remove_paragraph(&mut self) {
@@ -96,7 +121,6 @@ impl Epub {
     }
 
     pub fn get_text(&self) -> String {
-	//Get all paragraphs between paragraph_index and end_paragraph_index
 	let mut text = String::new();
 	for i in self.paragraph_index..self.end_paragraph_index {
 	    text.push_str(&self.current_text[i]);

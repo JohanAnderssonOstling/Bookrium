@@ -25,6 +25,9 @@ public slots:
     QString addParagraph();
     QString addPrevParagraph();
     void nextChapter();
+    void prevChapter();
+    void goTo(QString href);
+
     void removeParagraph();
     void removePrevParagraph();
     void resetParagraph();

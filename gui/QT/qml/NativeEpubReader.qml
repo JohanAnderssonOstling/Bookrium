@@ -4,10 +4,7 @@ import QtQuick.Layouts
 import johandost.EpubModel 1.0
 RowLayout {
     property var loaded: false
-
-    EpubModel {
-	id: epubModel
-    }
+    EpubModel { id: epubModel }
 
     Repeater {
 	id: epubReader
@@ -17,11 +14,26 @@ RowLayout {
 	    Layout.preferredHeight: parent.height
 	    textFormat: Text.RichText
 	    wrapMode: TextEdit.WordWrap
+	    selectByMouse: true
+	    readOnly: true
+	    onLinkActivated: {
+		epubModel.goTo(link);
+		layout();
+	    }
+
+	    onLinkHovered: {
+
+	    }
 	    text: "5"
 	}
     }
 
     Keys.onLeftPressed: {
+	if (event.modifiers && Qt.ControlModifier) {
+	    epubModel.prevChapter();
+	    layout();
+	    return;
+	}
 	epubModel.prevParagraphs();
 	layoutReverse();
 	layout();
@@ -31,6 +43,7 @@ RowLayout {
 	if (event.modifiers && Qt.ControlModifier) {
 	    epubModel.nextChapter();
 	    layout();
+	    return;
 	}
 	epubModel.nextParagraphs();
 	layout();
