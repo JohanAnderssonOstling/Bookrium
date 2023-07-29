@@ -3,6 +3,8 @@
 #include <QQmlContext>
 #include "homemodel.h"
 #include "librarymodel.h"
+#include "epubmodel.h"
+
 int main(int argc, char* argv[])
 {
     QGuiApplication app(argc, argv);
@@ -10,6 +12,7 @@ int main(int argc, char* argv[])
     HomeModel homeModel;
     QCoreApplication::setAttribute(Qt::AA_UseSoftwareOpenGL);    engine.rootContext()->setContextProperty("HomeModel", &homeModel);
     qmlRegisterType<LibraryModel>("johandost.LibraryModel", 1, 0, "LibraryModel");
+    qmlRegisterType<EpubModel>("johandost.EpubModel", 1, 0, "EpubModel");
 
     const QUrl url(QStringLiteral("../qml/main.qml"));
     QObject::connect(&engine,&QQmlApplicationEngine::objectCreated,&app,

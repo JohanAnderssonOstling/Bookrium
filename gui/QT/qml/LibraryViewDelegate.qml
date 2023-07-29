@@ -52,7 +52,7 @@ Column {
     function openMedia() {
 	let extension = path.split(".").pop();
 	if (extension === "pdf") openPdf();
-	if (extension === "epub") openEpub();
+	if (extension === "epub") openNativeEpub();
     }
 
     function openPdf() {
@@ -71,7 +71,6 @@ Column {
 	}
     }
 
-
     function openEpub() {
 	let epubReaderComp = Qt.createComponent("EpubReader.qml");
 	if (epubReaderComp.status === Component.Ready) {
@@ -83,4 +82,11 @@ Column {
 	    console.log(epubReaderComp.errorString());
 	}
     }
+    function openNativeEpub() {
+	let NativeEpubReader = Qt.createComponent("NativeEpubReader.qml");
+	let nativeEpubReader = NativeEpubReader.createObject(parent);
+
+	stackView.push(nativeEpubReader);
+    }
+
 }
