@@ -1,5 +1,6 @@
 <RCC version="1.0">
     <qresource prefix="/">
         <file>main.qml</file>
+        <file>web/chapter10.html</file>
     </qresource>
 </RCC>

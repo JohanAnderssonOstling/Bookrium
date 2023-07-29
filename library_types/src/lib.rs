@@ -1,5 +1,5 @@
 pub mod home_types;
-mod epub_type;
+pub mod epub_type;
 
 use std::path::*;
 use serde::{Deserialize, Serialize};

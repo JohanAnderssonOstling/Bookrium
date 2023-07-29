@@ -5,7 +5,7 @@ import QtQuick.Layouts
 
 Window {
 	id: window
-	width: 640
+	width: 1600
 	height: 480
 	visible: true
 	title: qsTr("Juveler")
