@@ -26,8 +26,10 @@ public slots:
     QString addPrevParagraph();
     void nextChapter();
     void removeParagraph();
+    void removePrevParagraph();
     void resetParagraph();
     void nextParagraphs();
+    void prevParagraphs();
 private:
     rust::String epub_uuid;
 };

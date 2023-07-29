@@ -22,13 +22,27 @@ impl Epub {
     }
 
     pub fn next_chapter(&mut self) {
+
 	let epub = rbook::Epub::new(&self.path).unwrap();
 	let mut reader = epub.reader();
-	self.chapter_index += 1;
-	self.paragraph_index = 0;
-	self.end_paragraph_index = 0;
+
+	self.chapter_index 	+= 1;
+	self.paragraph_index 	= 0;
+	self.end_paragraph_index= 0;
 	reader.set_current_page(self.chapter_index.clone()).unwrap().unwrap();
 	self.current_text = parse_paragraphs(reader);
+    }
+
+    pub fn prev_chapter(&mut self) {
+	if self.chapter_index == 0 { return }
+
+	let epub = rbook::Epub::new(&self.path).unwrap();
+	let mut reader = epub.reader();
+	self.chapter_index -= 1;
+	reader.set_current_page(self.chapter_index.clone()).unwrap().unwrap();
+	self.current_text 	= parse_paragraphs(reader);
+	self.paragraph_index 	= self.current_text.len() ;
+	self.end_paragraph_index= self.current_text.len() ;
     }
 
     pub fn add_paragraph(&mut self) -> String {
@@ -47,18 +61,34 @@ impl Epub {
 	self.current_text[self.paragraph_index].clone()
     }
 
+    fn get_paragraph(&self, index: usize) -> String {
+	let paragraph = self.current_text[index].clone();
+    }
+
     pub fn remove_paragraph(&mut self) {
 	if self.end_paragraph_index > self.paragraph_index {
 	    self.end_paragraph_index -= 1;
     	}
     }
 
+    pub fn remove_prev_paragraph(&mut self) {
+	if self.paragraph_index < self.end_paragraph_index {
+	    self.paragraph_index += 1;
+	}
+    }
+
     pub fn next_paragraphs(&mut self) {
-	if self.end_paragraph_index >= self.current_text.len() - 1 {
+	if self.end_paragraph_index + 1 >= self.current_text.len()  {
 	    println!("End of chapter")	;
 	    return self.next_chapter();
 	}
 	self.paragraph_index = self.end_paragraph_index;
+    }
+
+    pub fn prev_paragraphs(&mut self) {
+	if self.paragraph_index == 0 {
+	    return self.prev_chapter();
+	}
     }
 
     pub fn reset_paragraph(&mut self) {

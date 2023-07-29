@@ -43,3 +43,13 @@ QString EpubModel::addPrevParagraph() {
   return asQStr(add_prev_paragraph(epub_uuid));
 }
 
+void EpubModel::prevParagraphs() {
+  prev_paragraphs(epub_uuid);
+
+}
+
+void EpubModel::removePrevParagraph() {
+  remove_prev_paragraph(epub_uuid);
+
+}
+

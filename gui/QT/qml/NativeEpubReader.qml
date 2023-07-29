@@ -22,6 +22,7 @@ RowLayout {
     }
 
     Keys.onLeftPressed: {
+	epubModel.prevParagraphs();
 	layoutReverse();
 	layout();
     }
@@ -84,7 +85,7 @@ RowLayout {
 		item.text = newText + oldText;
 	    }
 	    item.text = oldText;
-
+	    epubModel.removePrevParagraph();
 	}
     }
 

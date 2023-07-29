@@ -19,8 +19,10 @@ mod ffi {
         fn add_prev_paragraph(uuid: &str) -> String;
 
 	fn remove_paragraph(uuid: &str);
+        fn remove_prev_paragraph(uuid: &str);
         fn reset_paragraph(uuid: &str);
         fn next_paragraphs(uuid: &str);
+        fn prev_paragraphs(uuid: &str);
     }
 
 }
@@ -62,6 +64,12 @@ fn remove_paragraph (uuid: &str) {
     epub.remove_paragraph();
 }
 
+fn remove_prev_paragraph (uuid: &str) {
+    let mut epubs = EPUBS.lock().unwrap();
+    let epub = epubs.get_mut(uuid).unwrap();
+    epub.remove_prev_paragraph();
+}
+
 fn reset_paragraph (uuid: &str) {
     let mut epubs = EPUBS.lock().unwrap();
     let epub = epubs.get_mut(uuid).unwrap();
@@ -72,4 +80,10 @@ fn next_paragraphs (uuid: &str) {
     let mut epubs = EPUBS.lock().unwrap();
     let epub = epubs.get_mut(uuid).unwrap();
     epub.next_paragraphs();
+}
+
+fn prev_paragraphs (uuid: &str) {
+    let mut epubs = EPUBS.lock().unwrap();
+    let epub = epubs.get_mut(uuid).unwrap();
+    epub.prev_paragraphs();
 }
