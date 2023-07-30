@@ -4,6 +4,8 @@ import QtQuick.Layouts
 import johandost.EpubModel 1.0
 RowLayout {
     property var loaded: false
+    property var uuid;
+    property var epubPath;
     EpubModel { id: epubModel }
 
     Repeater {
@@ -21,10 +23,7 @@ RowLayout {
 		layout();
 	    }
 
-	    onLinkHovered: {
-
-	    }
-	    text: "5"
+	    onLinkHovered: {}
 	}
     }
 
@@ -49,24 +48,21 @@ RowLayout {
 	layout();
     }
 
-
-
-    Component.onCompleted: {
-	console.log("Opening epub");
-	epubModel.openEpub("");
-	epubModel.nextChapter();
-	epubModel.nextChapter();
-	epubModel.nextChapter();
-	epubModel.nextChapter();
-	epubModel.nextChapter();
+    function loadEpub (uuid, epubPath) {
+	this.uuid = uuid;
+	this.epubPath = epubPath;
+	epubModel.openEpub(epubPath);
+	epubModel.setPos(libraryModel.getMediaPosition(uuid));
 	loaded = true;
-	console.log("Loaded: " + loaded );
     }
+
+
     onWidthChanged: layout()
 
     function layout() {
 	if (!loaded) return;
 	epubModel.resetParagraph();
+	libraryModel.setMediaPosition(uuid, epubModel.getPos());
 	resetText();
 	for (let i = 0; i < epubReader.count; i++) {
 	    var item = epubReader.itemAt(i);
@@ -81,6 +77,7 @@ RowLayout {
 	    item.text = oldText;
 	    epubModel.removeParagraph();
 	}
+
     }
 
     function layoutReverse () {

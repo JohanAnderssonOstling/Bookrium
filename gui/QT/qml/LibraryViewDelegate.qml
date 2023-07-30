@@ -85,7 +85,7 @@ Column {
     function openNativeEpub() {
 	let NativeEpubReader = Qt.createComponent("NativeEpubReader.qml");
 	let nativeEpubReader = NativeEpubReader.createObject(parent);
-
+	nativeEpubReader.loadEpub(uuid, path);
 	stackView.push(nativeEpubReader);
     }
 

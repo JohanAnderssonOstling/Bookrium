@@ -33,6 +33,9 @@ public slots:
     void resetParagraph();
     void nextParagraphs();
     void prevParagraphs();
+
+    QString getPos();
+    void setPos(QString pos);
 private:
     rust::String epub_uuid;
 };

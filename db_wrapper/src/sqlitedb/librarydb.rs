@@ -41,14 +41,19 @@ impl LibraryDBConn {
 	    let name: String = row.get(2).unwrap();
 	    let parent_uuid: String = row.get(1).unwrap();
 
-	    if parent_uuid.eq("root") { return Ok(()); };
+	    if parent_uuid.eq("root") {
+		path = format!("{}/", name);
+		return Ok(());
+	    };
+	    println!("get_dir_path: {} {}", parent_uuid, name);
 
 	    let dir_path = self.get_dir_path(parent_uuid.as_str());
 	    path = format!("{}/{}", dir_path, name);
 	    Ok(())
 	}).expect("Error getting media position");
-	path
-    }
+	let p = path;
+	p
+     }
 
     pub fn insert_book_dir(&self, book_uuid: &str, dir_uuid: &str) {
 	println!("insert_book_dir: {} {}", book_uuid, dir_uuid);

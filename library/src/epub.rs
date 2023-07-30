@@ -26,7 +26,6 @@ impl Epub {
 	let id = href.split("#").collect::<Vec<&str>>()[1];
 	let epub = rbook::Epub::new(&self.path).unwrap();
 	let mut reader = epub.reader();
-	println!("page: {}", page);
 
 	reader.set_current_page_str(format!("text/{}", page).as_str()).unwrap().unwrap();
 	self.chapter_index = reader.current_index();
@@ -37,10 +36,10 @@ impl Epub {
 	    if paragraph.contains(format!("id=\"{}\"", id).as_str()) {
 		self.paragraph_index = i;
 		self.end_paragraph_index = i;
+		return;
 	    }
 	}
     }
-
 
     pub fn next_chapter(&mut self) {
 
@@ -78,9 +77,7 @@ impl Epub {
     }
 
     pub fn add_prev_paragraph(&mut self) -> String {
-	if self.paragraph_index == 0 {
-	    return "BOF".into();
-	}
+	if self.paragraph_index == 0 { return "BOF".into(); }
 	self.paragraph_index -= 1;
 	self.current_text[self.paragraph_index].clone()
     }
@@ -126,6 +123,18 @@ impl Epub {
 	    text.push_str(&self.current_text[i]);
 	}
 	text
+    }
+
+    pub fn get_pos(&self) -> String {
+	format!("{}:{}", self.chapter_index, self.paragraph_index)
+    }
+
+    pub fn set_pos(&mut self, pos: &str) {
+	let pos = pos.split(":").collect::<Vec<&str>>();
+	self.chapter_index = pos[0].parse::<usize>().unwrap();
+	self.paragraph_index = pos[1].parse::<usize>().unwrap();
+	self.end_paragraph_index = self.paragraph_index;
+
     }
 }
 fn parse_paragraphs(reader: Reader) -> Vec<String> {

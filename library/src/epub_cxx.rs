@@ -25,12 +25,16 @@ mod ffi {
         fn reset_paragraph(uuid: &str);
         fn next_paragraphs(uuid: &str);
         fn prev_paragraphs(uuid: &str);
+        fn get_pos(uuid: &str) -> String;
+	fn set_pos(uuid: &str, pos: &str);
     }
 
 }
 
 fn open_epub (path: &str) -> String {
-    let epub = Epub::new(path);
+    let path = path.to_string();
+    path.replace("\\\"", "\\");
+    let epub = Epub::new(path.as_str());
     let uuid = uuid::Uuid::new_v4().to_string();
     EPUBS.lock().unwrap().insert(uuid.clone(), epub);
     uuid
@@ -100,4 +104,16 @@ fn prev_paragraphs (uuid: &str) {
     let mut epubs = EPUBS.lock().unwrap();
     let epub = epubs.get_mut(uuid).unwrap();
     epub.prev_paragraphs();
+}
+
+fn get_pos (uuid: &str) -> String {
+    let mut epubs = EPUBS.lock().unwrap();
+    let epub = epubs.get_mut(uuid).unwrap();
+    epub.get_pos()
+}
+
+fn set_pos (uuid: &str, pos: &str) {
+    let mut epubs = EPUBS.lock().unwrap();
+    let epub = epubs.get_mut(uuid).unwrap();
+    epub.set_pos(pos);
 }

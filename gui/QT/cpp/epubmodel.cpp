@@ -9,7 +9,7 @@ EpubModel::EpubModel(QObject *parent) : QObject(parent) {
 }
 
 void EpubModel::openEpub(const QString &path) {
-  epub_uuid = open_epub(asRustStr("/home/johan/Hem/Downloads/PDFBöcker/[9781732102200] John Ousterhout - A Philosophy of Software Design (0) - libgen.li.epub"));
+  epub_uuid = open_epub(asRustStr(path));
 }
 
 QString EpubModel::getText()      { return asQStr (get_text (epub_uuid));}
@@ -25,4 +25,10 @@ void EpubModel::removePrevParagraph() { remove_prev_paragraph(epub_uuid);}
 void EpubModel::prevChapter() {  prev_chapter(epub_uuid); }
 
 void EpubModel::goTo(QString href) {go_to(epub_uuid, asRustStr(href));}
+
+QString EpubModel::getPos() {return asQStr(get_pos(epub_uuid));}
+
+void EpubModel::setPos(QString pos) {
+  set_pos(epub_uuid, asRustStr(pos));
+}
 
