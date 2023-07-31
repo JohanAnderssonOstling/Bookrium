@@ -2,21 +2,51 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import johandost.EpubModel 1.0
-RowLayout {
+Row {
+
+    function backButtonPressed() {
+	stackView.pop();
+    }
+
     property var loaded: false
     property var uuid;
     property var epubPath;
+    property string title;
     EpubModel { id: epubModel }
+
+
+    readonly property int maxCharacters: 80
+    property font textEditFont: Qt.font({
+	pointSize: 16 // Or any desired font size
+    })
+
+    FontMetrics {
+	id: fontMetrics
+	font: textEditFont
+    }
+
+    property real textEditMaxWidth: 80 * fontMetrics.averageCharacterWidth
+
+    readonly property int textEditCount: Math.max(1, Math.floor(parent.width / textEditMaxWidth))
+    Component.onCompleted: {
+	layout();
+    }
 
     Repeater {
 	id: epubReader
-	model: 4
+	model: textEditCount
+	onModelChanged: {
+	    console.log("model changed");
+	    layout();
+	}
+
 	TextEdit {
-	    Layout.preferredWidth: parent.width / 4
-	    Layout.preferredHeight: parent.height
+	    width: parent.width / textEditCount
+	    height: parent.height
 	    textFormat: Text.RichText
 	    wrapMode: TextEdit.WordWrap
 	    selectByMouse: true
+	    font: textEditFont
 	    readOnly: true
 	    onLinkActivated: {
 		epubModel.goTo(link);
@@ -30,6 +60,7 @@ RowLayout {
     Keys.onLeftPressed: {
 	if (event.modifiers && Qt.ControlModifier) {
 	    epubModel.prevChapter();
+	    console.log(textEditMaxWidth);
 	    layout();
 	    return;
 	}
@@ -48,16 +79,29 @@ RowLayout {
 	layout();
     }
 
-    function loadEpub (uuid, epubPath) {
+    Keys.onPressed: {
+	if (event.key === Qt.Key_Plus) {
+	    // Handle "+" key press here
+	    textEditFont.pointSize += 1
+	    layout();
+	} else if (event.key === Qt.Key_Minus) {
+	    // Handle "-" key press here
+	    textEditFont.pointSize -= 1
+	    layout();
+	}
+    }
+
+    onWidthChanged: layout()
+
+    function loadEpub (uuid, epubPath, title) {
 	this.uuid = uuid;
 	this.epubPath = epubPath;
+	this.title = title;
 	epubModel.openEpub(epubPath);
 	epubModel.setPos(libraryModel.getMediaPosition(uuid));
 	loaded = true;
+	layout();
     }
-
-
-    onWidthChanged: layout()
 
     function layout() {
 	if (!loaded) return;
