@@ -31,7 +31,8 @@ int HomeModel::rowCount(const QModelIndex &parent) const {
 }
 
 //Signals
-void HomeModel::createLibrary(const QString& path){
+void HomeModel::createLibrary(QString path){
+    path = path.replace("file://", "");
     rust::String name = path.split("/").last().toUtf8().constData();
     create_library(name, path.toStdString(), "localhost:8080");
     updateLibraries();

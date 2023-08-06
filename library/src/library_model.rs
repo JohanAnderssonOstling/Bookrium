@@ -1,25 +1,30 @@
-use std::path::PathBuf;
-use std::time::SystemTime;
+use std::fs;
+use std::path::{Path, PathBuf};
+use std::time::*;
 
 use db_wrapper::sqlitedb::librarydb::LibraryDBConn;
-use file_io::file_io::*;
-use file_io::folder_scanner::scan_dir;
-use file_io::media_parser::{get_uuid, parse_book};
 use library_types::*;
 use uuid::Uuid;
+use crate::book_parser::{get_uuid, parse_book};
+use crate::library_io::{create_thumbnails, scan_dir};
 
 pub struct LibraryModel {
     db: LibraryDBConn,
     pub uuid: String,
     pub path: String,
+    meta_path: String,
 }
 
 impl LibraryModel {
     pub fn open(uuid: &str, path: &str) -> Self {
+	let meta_path = format!("{path}/.bookrium");
+	fs::create_dir_all(&meta_path).unwrap();
+	let db_path = format!("{meta_path}/library.db");
 	Self {
-	    db: LibraryDBConn::new(uuid),
+	    db: LibraryDBConn::new(db_path.as_str()),
 	    uuid: uuid.to_string(),
 	    path: path.to_string(),
+	    meta_path,
 	}
     }
 
@@ -52,14 +57,12 @@ impl LibraryModel {
 	    self.scan_lib_aux(dir, uuid.as_str());
 	}
 
-	for file in dir.1 {
-	    self.scan_book(file, parent_uuid);
-	}
+	for file in dir.1 { self.scan_book(file, parent_uuid); }
     }
 
     fn scan_book(&self, file: PathBuf, parent_uuid: &str) {
-	let file_name = file.file_name().unwrap().to_str().unwrap();
-	let existing_uuid = self.db.get_book_uuid(file_name);
+	let file_name 		= file.file_name().unwrap().to_str().unwrap();
+	let existing_uuid 	= self.db.get_book_uuid(file_name);
 
 	if let Some(uuid) = existing_uuid {
 	    self.db.insert_book_dir(&uuid, parent_uuid);
@@ -73,14 +76,18 @@ impl LibraryModel {
 	    }
 	}
 
-	let book = parse_book(&file, parent_uuid);
+	let book_res = parse_book(&file, parent_uuid);
+	if book_res.is_none() { return; }
+	let book = book_res.unwrap();
 	let scan_timestamp = SystemTime::now().duration_since(
-	    SystemTime::UNIX_EPOCH).unwrap().as_secs();
+	    UNIX_EPOCH).unwrap().as_secs();
 	self.db.insert_book(&book.0, scan_timestamp);
 	self.db.insert_book_dir(&book.0.book.uuid, parent_uuid);
-	if book.1.is_some() {
+	if  book.1.is_some() {
 	    let cover = book.1.unwrap();
-	    create_thumbs(&self.uuid, &book.0.book.uuid, cover);
+	    let output_path = format!("{}/{}", self.meta_path, book.0.book.uuid);
+	    std::fs::create_dir_all(&output_path).unwrap();
+	    create_thumbnails(output_path, cover);
 	}
     }
 }
@@ -92,6 +99,14 @@ impl LibraryModel {
 
     pub fn get_pos(&self, uuid: &str) -> String {
 	self.db.get_pos(uuid)
+    }
+
+    pub fn get_cover_path (&self, book_uuid: &str) -> Option<String> {
+	let path_str = format!("{}/{book_uuid}/256.jpg", self.meta_path);
+	println!("get_cover_path: {}", path_str);
+	let path = Path::new(&path_str);
+	if !path.exists() {return None;}
+	Some(path.to_str().unwrap().to_string())
     }
 }
 

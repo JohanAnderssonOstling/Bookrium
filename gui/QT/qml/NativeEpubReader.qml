@@ -3,7 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import johandost.EpubModel 1.0
 Row {
-
+	spacing: 40
     function backButtonPressed() {
 	stackView.pop();
     }
@@ -15,7 +15,7 @@ Row {
     EpubModel { id: epubModel }
 
 
-    readonly property int maxCharacters: 80
+    readonly property int maxCharacters: 40
     property font textEditFont: Qt.font({
 	pointSize: 16 // Or any desired font size
     })
@@ -25,7 +25,7 @@ Row {
 	font: textEditFont
     }
 
-    property real textEditMaxWidth: 80 * fontMetrics.averageCharacterWidth
+    property real textEditMaxWidth: maxCharacters * fontMetrics.averageCharacterWidth
 
     readonly property int textEditCount: Math.max(1, Math.floor(parent.width / textEditMaxWidth))
     Component.onCompleted: {
@@ -35,13 +35,10 @@ Row {
     Repeater {
 	id: epubReader
 	model: textEditCount
-	onModelChanged: {
-	    console.log("model changed");
-	    layout();
-	}
+	onModelChanged: {layout();}
 
 	TextEdit {
-	    width: parent.width / textEditCount
+	    width: (parent.width - parent.spacing * (textEditCount - 1)) / textEditCount
 	    height: parent.height
 	    textFormat: Text.RichText
 	    wrapMode: TextEdit.WordWrap
@@ -52,7 +49,6 @@ Row {
 		epubModel.goTo(link);
 		layout();
 	    }
-
 	    onLinkHovered: {}
 	}
     }
@@ -112,12 +108,12 @@ Row {
 	    var item = epubReader.itemAt(i);
 	    var oldText = "";
 	    item.text = "";
-	    while (item.height > item.contentHeight) {
+	     do {
 		oldText = item.text;
 		let newText = epubModel.addParagraph();
 		if (newText === "EOF") return;
 		item.text = oldText + newText;
-	    }
+	    } while (item.height > item.contentHeight);
 	    item.text = oldText;
 	    epubModel.removeParagraph();
 	}
@@ -132,12 +128,12 @@ Row {
 	    var item = epubReader.itemAt(i);
 	    var oldText = "";
 	    item.text = "";
-	    while (item.height > item.contentHeight) {
+	    do  {
 		oldText = item.text;
 		let newText = epubModel.addPrevParagraph();
 		if (newText === "BOF") return;
 		item.text = newText + oldText;
-	    }
+	    } while (item.height > item.contentHeight);
 	    item.text = oldText;
 	    epubModel.removePrevParagraph();
 	}

@@ -23,7 +23,7 @@ SELECT uuid FROM book WHERE uuid = :uuid;
 --param: 	scan_timestamp: u64
 INSERT INTO book
   ( uuid, file_name, progress, position, navigation,
-    title, desc, identifiers, published, scan_timestamp)
+    title, desc, identifiers, published, library_add_timestamp)
 VALUES
   (:uuid,:file_name,:progress,:position,:navigation,
    :title,:desc,:identifiers,:published,:scan_timestamp);

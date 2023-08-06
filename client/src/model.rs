@@ -1,38 +1,34 @@
-use db_wrapper::csvdb::client_db::*;
+use std::fs::OpenOptions;
 use library_types::home_types::Library;
+use csv::*;
 
-pub struct ClientModel {
-    conn: ClientDBConn, // Connection to the database
+const CSV_PATH: &str = "/home/johan/.local/share/media_library/home.csv";
+
+
+pub fn create_library(path: &str) -> Library {
+    let library = Library::new(path);
+    let file = OpenOptions::new().create(true).append(true)
+                                 .open(CSV_PATH).unwrap();
+    let mut writer = WriterBuilder::new()
+        .has_headers(false)
+        .from_writer(file);
+    writer.serialize(&library).unwrap();
+    writer.flush().unwrap();
+    library
 }
-pub fn init_db(){
-    //client_db::init_db();
+
+pub fn get_libraries() -> Vec<Library> {
+    let mut reader = Reader::from_path(CSV_PATH).unwrap();
+    reader.deserialize().map(|result| result.unwrap()).collect()
 }
-impl ClientModel {
 
-    pub fn new() -> Self {
-        //server::start_db_server();
-
-        let conn = ClientDBConn::open("/home/johan/.local/share/media_library/home.csv");
-        Self { conn }
-    }
-   
-    pub fn create_library(&self, library: &Library) {
-        self.conn.insert_library(library);
-    }
-
-
-    pub fn get_libraries(&self) -> Vec<Library> {
-        self.conn.select_libraries()
-    }
-
-
-    pub  fn delete_library(&self, uuid: &str) {
-        //self.conn.delete_library(uuid).await.unwrap();
-        todo!()
-    }
-   
-    pub fn get_library(&self, uuid: &str) -> Library {
-        //self.conn.select_library(uuid).await.unwrap()
-        todo!()
-    }
+pub fn delete_library(uuid: &str) {
+    //self.conn.delete_library(uuid).await.unwrap();
+    todo!()
 }
+
+pub fn get_library(uuid: &str) -> Library {
+    //self.conn.select_library(uuid).await.unwrap()
+    todo!()
+}
+

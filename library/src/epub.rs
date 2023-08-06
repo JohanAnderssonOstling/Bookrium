@@ -108,9 +108,7 @@ impl Epub {
     }
 
     pub fn prev_paragraphs(&mut self) {
-	if self.paragraph_index == 0 {
-	    return self.prev_chapter();
-	}
+	if self.paragraph_index == 0 { return self.prev_chapter(); }
     }
 
     pub fn reset_paragraph(&mut self) {
@@ -130,21 +128,41 @@ impl Epub {
     }
 
     pub fn set_pos(&mut self, pos: &str) {
+	if pos == "" {
+
+	    return;
+	}
 	let pos = pos.split(":").collect::<Vec<&str>>();
 	self.chapter_index = pos[0].parse::<usize>().unwrap();
 	self.paragraph_index = pos[1].parse::<usize>().unwrap();
 	self.end_paragraph_index = self.paragraph_index;
 
     }
+
+   /* pub fn get_toc (&self) -> String {
+	let epub = rbook::Epub::new(&self.path).unwrap();
+
+	let toc = epub.toc().elements();
+	toc.iter().for_each(|chapter| {
+	    println!("{}: {}", chapter.title, chapter.href);
+	});
+	let mut toc_string = String::new();
+	for (i, chapter) in toc.iter().enumerate() {
+	    toc_string.push_str(format!("{}: {}\n", i, chapter.title).as_str());
+	}
+	toc_string
+    }*/
 }
 fn parse_paragraphs(reader: Reader) -> Vec<String> {
     let content = reader.current_page().unwrap().to_string();
-    content.split("\n")
-	   .map(|s| s.trim())
-	   .filter(|s| s.starts_with("<p"))
-	   .map(|s| s.to_string())
+    content.split(". ")
+	   .map(str::trim)
+	   .map(str::to_owned)
+	   .map(|s| format!("{s}."))
 	   .collect()
 }
+
+
 
 
 //Tests

@@ -29,7 +29,7 @@ public:
 
 
 public slots:
-    void createLibrary(const QString& name);
+    void createLibrary(QString name);
     void openLibrary(int row);
     void deleteLibrary(int row);
 };

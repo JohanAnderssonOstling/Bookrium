@@ -4,15 +4,15 @@ use include_sqlite_sql::{include_sql, impl_sql};
 use rusqlite::*;
 use serde_json::*;
 include_sql!("src/library.sql");
-
+include_sql!("src/create_library.sql");
 pub struct LibraryDBConn {
     pub db: rusqlite::Connection,
 }
 
 impl LibraryDBConn {
-    pub fn new(uuid: &str) -> Self {
-	let db = rusqlite::Connection::open("/home/johan/.local/share/media_library/libraries/test/library.db").unwrap();
-	Self { db }
+    pub fn new(path: &str) -> Self {
+	let db = rusqlite::Connection::open(path).unwrap();
+	Self { db: create_schema(db) }
     }
 
     pub fn insert_dir(&self, uuid: &str, path: &str, parent: &str) {
@@ -131,6 +131,10 @@ impl LibraryDBConn {
 	}).expect("Error getting media position");
 	position
     }
+
+    fn create_schema(&self) {
+
+    }
 }
 
 // Deserialize functions ---------------------------------------
@@ -145,5 +149,16 @@ fn deserialize_book(row: &Row) -> rusqlite::Result<LibBook> {
 	title: row.get(1).unwrap(),
 	progress: row.get(2).unwrap(),
     })
+}
+
+fn create_schema (db: Connection) -> Connection{
+    db.create_book_table().unwrap();
+    db.create_creator_table().unwrap();
+    db.create_book_creator_table().unwrap();
+    db.create_dir_table().unwrap();
+    db.create_book_dir_table().unwrap();
+    db.create_subject_table().unwrap();
+    db.create_book_subject_table().unwrap();
+    db
 }
 

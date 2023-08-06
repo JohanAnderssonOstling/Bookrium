@@ -8,9 +8,9 @@ edition = "2021"
 [dependencies]
 library_types = { path = "../library_types" }
 db_wrapper = { path = "../db_wrapper" }
-file_io = { path = "../file_io" }
 
 lazy_static = "1.4.0"
 dirs = "5.0.0"
 directories = "5.0.0"
 tokio = "1.28.0"
+csv = "1.2.2"

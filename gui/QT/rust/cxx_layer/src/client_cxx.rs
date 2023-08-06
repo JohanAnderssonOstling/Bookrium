@@ -4,12 +4,13 @@ use client::*;
 fn start_db(){}
 
 
+
 fn create_library(name: &str, path: &str, url: &str) -> Library{
-    convert_library(app::create_library(name, path, url))
+    convert_library(model::create_library(path))
 }
 
 fn get_libraries() -> Vec<Library>{
-    let rust_libraries = app::get_libraries();
+    let rust_libraries = model::get_libraries();
     let mut cxx_libraries = Vec::new();
     for rust_library in rust_libraries {
         cxx_libraries.push(convert_library(rust_library));
@@ -18,11 +19,15 @@ fn get_libraries() -> Vec<Library>{
 }
 
 fn delete_library(uuid: &str){
-    app::delete_library(uuid)
+    model::delete_library(uuid)
 }
 
-fn convert_library(library: library_types::home_types::Library) -> Library {
-    Library { uuid: library.uuid, name: library.name, path: library.path}
+fn convert_library(lib: library_types::home_types::Library) -> Library {
+    Library {
+        uuid: lib.uuid,
+        name: lib.path.split("/").last().unwrap().to_string(),
+        path: lib.path
+    }
 }
 
 #[cxx::bridge]
