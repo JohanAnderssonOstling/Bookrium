@@ -42,8 +42,8 @@ impl LibraryDBConn {
 	    let parent_uuid: String = row.get(1).unwrap();
 
 	    if parent_uuid.eq("root") {
-		path = format!("{}/", name);
-		return Ok(());
+			path = format!("{}/", name);
+			return Ok(());
 	    };
 	    println!("get_dir_path: {} {}", parent_uuid, name);
 
@@ -51,8 +51,7 @@ impl LibraryDBConn {
 	    path = format!("{}/{}", dir_path, name);
 	    Ok(())
 	}).expect("Error getting media position");
-	let p = path;
-	p
+	path.replace("//", "/")
      }
 
     pub fn insert_book_dir(&self, book_uuid: &str, dir_uuid: &str) {
@@ -106,7 +105,7 @@ impl LibraryDBConn {
 	    dir_path = self.get_dir_path(dir_uuid.as_str());
 	    Ok(())
 	}).expect("Error getting book file name");
-	format!("{}/{}{}", library_path, dir_path, book_file_name).replace("/None", "")
+	format!("{}/{}/{}", library_path, dir_path, book_file_name).replace("/None", "")
     }
 
     pub fn book_exists(&self, uuid: &str) -> bool {
@@ -132,9 +131,6 @@ impl LibraryDBConn {
 	position
     }
 
-    fn create_schema(&self) {
-
-    }
 }
 
 // Deserialize functions ---------------------------------------

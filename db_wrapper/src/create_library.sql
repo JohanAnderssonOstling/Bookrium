@@ -1,16 +1,16 @@
 -- name: create_book_table!
 
 create table if not exists book(
-  uuid                  TEXT primary key,
-  file_name             TEXT    not null,
-  progress              INTEGER not null,
-  position              TEXT,
-  navigation            TEXT,
-  title                 text,
-  desc                  text,
-  identifiers           TEXT,
-  published             INTEGER not null,
-  last_read             INTEGER,
+  uuid		TEXT primary key,
+  file_name     TEXT    not null,
+  progress      INTEGER not null,
+  position      TEXT,
+  navigation    TEXT,
+  title         TEXT,
+  desc          TEXT,
+  identifiers   TEXT,
+  published     INTEGER,
+  last_read     INTEGER,
   library_add_timestamp INTEGER
 );
 
@@ -44,8 +44,9 @@ create table if not exists book_dir (
 
 -- name: create_subject_table!
 create table if not exists subject(
-  uuid TEXT,
-  name TEXT
+  uuid		TEXT primary key,
+  parent_uuid	TEXT,
+  name 		TEXT
 );
 
 -- name: create_book_subject_table!

@@ -85,15 +85,11 @@ fn get_book_path(uuid: &str, book_uuid: &str) -> String {
 #[cxx::bridge]
 mod library_ffi {
     pub struct CXXBook {
-	pub uuid: String,
-	pub title: String,
-	pub progress: u8,
+	pub uuid: String, pub title: String, pub progress: u8,
     }
 
     pub struct Dir {
-	pub uuid: String,
-	pub name: String,
-	pub parent: String,
+	pub uuid: String, pub name: String, pub parent: String,
     }
 
     extern "Rust" {

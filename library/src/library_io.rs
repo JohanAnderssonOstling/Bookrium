@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-use std::fs;
+use std::{fs, path};
 use std::io::Cursor;
 use std::path::PathBuf;
 use image::io::Reader;
@@ -24,6 +24,7 @@ pub fn scan_dir(path: &PathBuf) -> (Vec<PathBuf>, Vec<PathBuf>) {
     fs::read_dir(path).unwrap()
 		      .map(|res| res.unwrap().path())
 		      .filter(is_filetype)
+		      .filter(|path| path.file_name().unwrap().to_str().unwrap().chars().next().unwrap() != '.')
 		      .partition_map(|path| {
 			  if path.is_dir() { Either::Left(path) } else { Either::Right(path) }
 		      })
