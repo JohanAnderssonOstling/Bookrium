@@ -31,8 +31,6 @@ ColumnLayout {
 	fileMode: FileDialog.OpenFiles
 	nameFilters: "Books (*.epub *pdf)"
 	onAccepted: {
-	    console.log(newBooksDialog.file)
-
 	    LibraryModel.addBooks(newBooksDialog.files)
 	}
     }
@@ -52,25 +50,46 @@ ColumnLayout {
 	}
     }
 
-    GridView {
-
-	id: 	libraryGrid
-	model: 	LibraryModel 	{id: libraryModel}
-
-	Layout.fillWidth:  	true
-	Layout.fillHeight: 	true
-
-	property int coverWidth: 	256
-
-	cellWidth: 	coverWidth
-	cellHeight: 	coverWidth * 1.6 + 40
-	clip: 		true
-	ScrollBar.vertical: ScrollBar {}
-
-	delegate: LibraryViewDelegate {
-	    coverWidth: libraryGrid.coverWidth
-	    coverHeight: libraryGrid.coverWidth * 1.6
+    RowLayout {
+	Column {
+	    Layout.alignment: Qt.AlignLeft
+	    Layout.fillHeight: true
+	    Button {
+		text: "Home"
+	    }
+	    Button {
+		text: "Books"
+	    }
+	    Button {
+		text: "Authors"
+	    }
+	    Button {
+		text: "Folders"
+	    }
+	    Button {
+		text: "Subjects"
+	    }
+	    Button {
+		text: "Publishers"
+	    }
 	}
+	GridView {
+	    id: 	libraryGrid
+	    model: 	LibraryModel 	{id: libraryModel}
+	    Layout.fillWidth:  	true
+	    Layout.fillHeight: 	true
+	    property int coverWidth: 	256
+	    cellWidth: 	coverWidth
+	    cellHeight: coverWidth * 1.6 + 40
+	    clip: 	true
+	    ScrollBar.vertical: ScrollBar {}
 
+	    delegate: LibraryViewDelegate {
+		coverWidth: libraryGrid.coverWidth
+		coverHeight: libraryGrid.coverWidth * 1.6
+	    }
+
+	}
     }
+
 }

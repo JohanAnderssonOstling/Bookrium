@@ -14,9 +14,11 @@ Q_OBJECT
 private:
     rust::String library_uuid;
     rust::String library_path;
+	rust::String containerType;
     rust::Vec<CXXBook> books;
     rust::Vec<Dir> dirs;
     QStack<Dir> dir_stack;
+
 
     QVariant bookData(int row, int role) const;
     QVariant dirData(int row, int role) const;

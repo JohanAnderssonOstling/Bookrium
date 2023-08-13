@@ -20,14 +20,15 @@ QVariant LibraryModel::data(const QModelIndex &index, int role) const {
 }
 
 QVariant LibraryModel::bookData(int row, int role) const {
+	qInfo() << "Getting book at row:" << row;
   const CXXBook book = books.at(row);
+  qInfo() << "Book:" << row;
   switch (role) {
     case UUID: return asQStr (book.uuid);
     case Name: return asQStr (book.title);
     case Path: return asQStr (get_book_path (library_uuid, book.uuid) );
     case HasCover: return has_cover (library_uuid, book.uuid);
-    case Cover:
-      return asQStr (get_cover_path (library_uuid, book.uuid));
+    case Cover: return asQStr (get_cover_path (library_uuid, book.uuid));
   }
 }
 

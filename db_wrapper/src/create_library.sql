@@ -24,8 +24,9 @@ create table if not exists creator(
 -- name: create_book_creator_table!
 create table if not exists book_creator(
   book_uuid    TEXT references book,
-  creator_uuid TEXT references creator,
-  type         TEXT not null
+  container_uuid TEXT references creator,
+  primary key (book_uuid, container_uuid)
+
 );
 
 -- name: create_dir_table!
@@ -52,6 +53,30 @@ create table if not exists subject(
 -- name: create_book_subject_table!
 create table if not exists book_subject(
   book_uuid    TEXT,
-  subject_uuid TEXT
+  container_uuid TEXT
+);
+
+-- name: create_publisher_table!
+create table if not exists publisher(
+  uuid	TEXT PRIMARY KEY,
+  name	TEXT
+);
+
+-- name: create_book_publisher_table!
+create table if not exists book_publisher(
+  book_uuid	TEXT,
+  container_uuid TEXT
+);
+
+-- name: create_language_table!
+create table if not exists language(
+  uuid		TEXT primary key,
+  name 		TEXT
+);
+
+-- name: create_book_language_table!
+create table if not exists book_language(
+  book_uuid    TEXT,
+  container_uuid TEXT
 );
 

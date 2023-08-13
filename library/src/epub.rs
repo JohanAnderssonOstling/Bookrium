@@ -34,9 +34,9 @@ impl Epub {
 	self.current_text = parse_paragraphs(reader);
 	for (i, paragraph) in self.current_text.iter().enumerate() {
 	    if paragraph.contains(format!("id=\"{}\"", id).as_str()) {
-		self.paragraph_index = i;
-		self.end_paragraph_index = i;
-		return;
+			self.paragraph_index = i;
+			self.end_paragraph_index = i;
+			return;
 	    }
 	}
     }
@@ -45,11 +45,9 @@ impl Epub {
 
 	let epub = rbook::Epub::new(&self.path).unwrap();
 	let mut reader = epub.reader();
-	if (reader.page_count() - 1) == self.chapter_index {
-	    return
-	}
+	if (reader.page_count() - 1) == self.chapter_index { return }
 
-	self.chapter_index 	+= 1;
+	self.chapter_index 		+=1;
 	self.paragraph_index 	= 0;
 	self.end_paragraph_index= 0;
 	reader.set_current_page(self.chapter_index.clone()).unwrap().unwrap();
@@ -108,7 +106,7 @@ impl Epub {
     }
 
     pub fn prev_paragraphs(&mut self) {
-	if self.paragraph_index == 0 { return self.prev_chapter(); }
+	if self.paragraph_index == 0 { self.prev_chapter(); }
     }
 
     pub fn reset_paragraph(&mut self) {
@@ -128,13 +126,10 @@ impl Epub {
     }
 
     pub fn set_pos(&mut self, pos: &str) {
-	if pos == "" {
-
-	    return;
-	}
-	let pos = pos.split(":").collect::<Vec<&str>>();
-	self.chapter_index = pos[0].parse::<usize>().unwrap();
-	self.paragraph_index = pos[1].parse::<usize>().unwrap();
+	if pos.is_empty() { return; }
+	let pos = pos.split(':').collect::<Vec<&str>>();
+	self.chapter_index 		= pos[0].parse::<usize>().unwrap();
+	self.paragraph_index 	= pos[1].parse::<usize>().unwrap();
 	self.end_paragraph_index = self.paragraph_index;
 
     }

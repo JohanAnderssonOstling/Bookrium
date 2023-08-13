@@ -66,7 +66,6 @@ fn convert_dir(dirs: Vec<library_types::Dir>) -> Vec<Dir> {
     dirs.into_iter().map(|dir| Dir {
 	uuid: dir.uuid,
 	name: dir.name,
-	parent: dir.parent,
     }).collect()
 }
 
@@ -89,7 +88,7 @@ mod library_ffi {
     }
 
     pub struct Dir {
-	pub uuid: String, pub name: String, pub parent: String,
+	pub uuid: String, pub name: String,
     }
 
     extern "Rust" {

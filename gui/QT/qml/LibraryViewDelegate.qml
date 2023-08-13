@@ -9,8 +9,9 @@ Column {
     id: column
     property int coverWidth
     property int coverHeight
-    width: 	coverWidth
-    height: 	coverHeight
+
+    width:coverWidth
+    height: coverHeight
     Layout.fillWidth: true
 
    Image {
@@ -37,11 +38,9 @@ Column {
     }
 
     Text {
-	width: 		parent.width
-	height: 	40
-	text: 		name
-	elide: 		Text.ElideRight
-	wrapMode: 	Text.Wrap
+	width:parent.width;	height:40
+	text:name
+	elide:Text.ElideRight;	wrapMode:Text.Wrap
 
 	horizontalAlignment: 	Text.AlignHCenter
     }
@@ -51,8 +50,8 @@ Column {
     }
     function openMedia() {
 	let extension = path.split(".").pop();
-	if (extension === "pdf") openPdf();
-	if (extension === "epub") openNativeEpub();
+	if (extension === "pdf") return openPdf();
+	if (extension === "epub") return openNativeEpub();
     }
 
     function openPdf() {

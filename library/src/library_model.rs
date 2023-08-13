@@ -10,20 +10,20 @@ use crate::library_io::{create_thumbnails, scan_dir};
 
 pub struct LibraryModel {
 	db: LibraryDBConn,
-	pub uuid: String,
-	pub path: String,
-	meta_path: String,
+	pub uuid: 	String,
+	pub path: 	String,
+	meta_path: 	String,
 }
 
 impl LibraryModel {
 	pub fn open(uuid: &str, path: &str) -> Self {
-		let meta_path = format!("{path}/.bookrium");
+		let meta_path 	= format!("{path}/.bookrium");
 		fs::create_dir_all(&meta_path).unwrap();
-		let db_path = format!("{meta_path}/library.db");
+		let db_path		= format!("{meta_path}/library.db");
 		Self {
-			db: LibraryDBConn::new(db_path.as_str()),
-			uuid: uuid.to_string(),
-			path: path.to_string(),
+			db: 	LibraryDBConn::new(db_path.as_str()),
+			uuid: 	uuid.to_string(),
+			path: 	path.to_string(),
 			meta_path,
 		}
 	}
@@ -47,48 +47,47 @@ impl LibraryModel {
 	}
 
 	fn scan_lib_aux(&self, scan_path: PathBuf, parent_uuid: &str) {
-		let dir = scan_dir(&scan_path);
+		let (dirs, files) = scan_dir(&scan_path);
 
-		for dir in dir.0 {
+		for dir in dirs {
 			let uuid = Uuid::new_v4().to_string();
 			let name = dir.file_name().unwrap().to_str().unwrap();
-
 			self.db.insert_dir(uuid.as_str(), name, parent_uuid);
 			self.scan_lib_aux(dir, uuid.as_str());
 		}
 
-		for file in dir.1 { self.scan_book(file, parent_uuid); }
+		for file in files { self.scan_book(file, parent_uuid); }
 	}
 
 	fn scan_book(&self, file: PathBuf, parent_uuid: &str) {
 		let file_name 		= file.file_name().unwrap().to_str().unwrap();
 		let existing_uuid 	= self.db.get_book_uuid(file_name);
 
-		if let Some(uuid) = existing_uuid {
+		if 	let Some(uuid) = existing_uuid {
 			self.db.insert_book_dir(&uuid, parent_uuid);
 			return;
 		}
 
-		if let Some(uuid) = get_uuid(file.as_path()) {
-			if self.db.book_exists(&uuid) {
+		if 	let Some(uuid) = get_uuid(file.as_path()) {
+			if 	self.db.book_exists(&uuid) {
 				self.db.insert_book_dir(&uuid, parent_uuid);
 				return;
 			}
 		}
+
 
 		let book_res = parse_book(&file, parent_uuid);
 		if  book_res.is_none() { return; }
 		let (book, cover_option) = book_res.unwrap();
 		let scan_time = SystemTime::now().duration_since(
 			UNIX_EPOCH).unwrap().as_secs();
-
-		self.db.insert_book(&book, scan_time);
-		self.db.insert_book_dir(&book.book.uuid, parent_uuid);
+		let book_uuid = book.book.uuid.clone();
+		self.db.insert_book(book, scan_time);
+		self.db.insert_book_dir(book_uuid.as_str(), parent_uuid);
 
 		if  let Some(cover) = cover_option { ;
-			let output_path = format!("{}/{}", self.meta_path, book.book.uuid);
-			std::fs::create_dir_all(&output_path).unwrap();
-			create_thumbnails(output_path, cover);
+			let out_path = format!("{}/{}", self.meta_path, book_uuid);
+			create_thumbnails(out_path, cover);
 		}
 	}
 }

@@ -44,6 +44,26 @@ FROM book
 JOIN book_dir ON book.uuid = book_dir.book_uuid
 WHERE book.uuid = :book_uuid LIMIT 1;
 
+-- ENTRIES -----------------------------------------------------
+
+-- name: get_entry?
+-- param: table_name: &str
+-- param: entry_name: &str
+SELECT uuid FROM :table_name WHERE name = :entry_name;
+
+-- name: insert_entry!
+-- param: table_name: &str
+-- param: uuid: &str
+-- param: name: &str
+INSERT INTO :table_name (uuid, name) VALUES (:uuid, :name);
+
+-- name: insert_book_entry!
+-- param: table_name: &str
+-- param: book_uuid
+-- param: container_uuid
+INSERT INTO :table_name	( book_uuid, container_uuid)
+VALUES 			(:book_uuid,:container_uuid);
+
 -- DIRS --------------------------------------------------------
 
 -- name: insert_dir!
@@ -56,7 +76,8 @@ VALUES 		(:dir_uuid,:name,:parent_uuid);
 -- name: get_dirs?
 -- # Parameters
 -- param: dir_uuid: &str
-SELECT dir_uuid, dir_name, parent_uuid FROM dir WHERE parent_uuid = :dir_uuid;
+SELECT dir_uuid, dir_name, parent_uuid
+FROM dir WHERE parent_uuid = :dir_uuid;
 
 -- name: clear_dirs!
 -- # Parameters
@@ -87,7 +108,7 @@ SELECT uuid FROM creator WHERE :creator_name = ?;
 -- param: name: &str
 INSERT INTO creator (uuid, name) VALUES (:uuid, :name);
 
--- name: get_creators?
+-- name: get_book_creators?
 -- # Parameters
 -- param: book_uuid: &str
 SELECT creator.uuid, creator.name, book_creator.type FROM creator
