@@ -44,25 +44,6 @@ FROM book
 JOIN book_dir ON book.uuid = book_dir.book_uuid
 WHERE book.uuid = :book_uuid LIMIT 1;
 
--- ENTRIES -----------------------------------------------------
-
--- name: get_entry?
--- param: table_name: &str
--- param: entry_name: &str
-SELECT uuid FROM :table_name WHERE name = :entry_name;
-
--- name: insert_entry!
--- param: table_name: &str
--- param: uuid: &str
--- param: name: &str
-INSERT INTO :table_name (uuid, name) VALUES (:uuid, :name);
-
--- name: insert_book_entry!
--- param: table_name: &str
--- param: book_uuid
--- param: container_uuid
-INSERT INTO :table_name	( book_uuid, container_uuid)
-VALUES 			(:book_uuid,:container_uuid);
 
 -- DIRS --------------------------------------------------------
 
@@ -95,48 +76,6 @@ SELECT * FROM dir WHERE dir_uuid = :dir_uuid;
 -- param: dir_uuid: &str
 INSERT INTO book_dir 	( book_uuid, dir_uuid)
 VALUES 			(:book_uuid,:dir_uuid);
-
--- CREATORS ----------------------------------------------------
-
--- name: select_creator_uuid?
--- param: creator_name: &str
-SELECT uuid FROM creator WHERE :creator_name = ?;
-
--- name: insert_creator!
--- # Parameters
--- param: uuid: &str
--- param: name: &str
-INSERT INTO creator (uuid, name) VALUES (:uuid, :name);
-
--- name: get_book_creators?
--- # Parameters
--- param: book_uuid: &str
-SELECT creator.uuid, creator.name, book_creator.type FROM creator
-JOIN book_creator ON creator.uuid = book_creator.creator_uuid
-JOIN book ON book_creator.book_uuid = book.uuid
-WHERE book.uuid = :book_uuid;
-
-
--- SUBJECTS ----------------------------------------------------
--- name: select_subject_uuid?
--- # Parameters
--- param: subject_name: &str
-SELECT uuid FROM subject WHERE :subject_name = ?;
-
--- name: insert_subject!
--- # Parameters
--- param: uuid: &str
--- param: name: &str
-INSERT INTO subject (uuid, name) VALUES (:uuid, :name);
-
--- name: get_subjects?
--- # Parameters
--- param: book_uuid: &str
-SELECT subject.uuid, subject.name FROM subject
-  JOIN book_subject ON subject.uuid = book_subject.subject_uuid
-JOIN book ON book_subject.book_uuid = book.uuid
-WHERE book.uuid = :book_uuid;
-
 
 -- name: set_pos!
 -- # Parameters

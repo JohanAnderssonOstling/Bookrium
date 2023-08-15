@@ -27,6 +27,7 @@ QVariant LibraryModel::bookData(int row, int role) const {
     case UUID: return asQStr (book.uuid);
     case Name: return asQStr (book.title);
     case Path: return asQStr (get_book_path (library_uuid, book.uuid) );
+	case IsContainer: return false;
     case HasCover: return has_cover (library_uuid, book.uuid);
     case Cover: return asQStr (get_cover_path (library_uuid, book.uuid));
   }
@@ -37,6 +38,7 @@ QVariant LibraryModel::dirData(int row, int role) const {
   switch (role) {
     case UUID: return asQStr (dir.uuid);
     case Name: return asQStr (dir.name);
+	case IsContainer: return true;
     case HasCover: return false;
     case Cover: return "";
   }
@@ -51,6 +53,7 @@ QHash<int, QByteArray> LibraryModel::roleNames() const {
   return {{UUID,     "uuid"},
           {Name,     "name"},
           {Path,     "path"},
+		  {IsContainer, "isContainer"},
           {HasCover, "hasCover"},
           {Cover,    "cover"}};
 }

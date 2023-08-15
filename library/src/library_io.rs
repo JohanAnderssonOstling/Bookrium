@@ -16,7 +16,7 @@ const HEIGHT_RATIO: f32 = 1.6;
 
 fn is_valid(path: &PathBuf) -> bool {
 	if	path.is_dir() { return true; }
-	if	path.file_name().unwrap().to_str().unwrap().starts_with('.') { return false; }
+	if	path.file_name().unwrap().to_str().unwrap().starts_with('.') { return true; }
 	let extension = path.extension().unwrap().to_str().unwrap();
 	FILETYPES.contains(extension)
 }

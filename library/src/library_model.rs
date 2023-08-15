@@ -75,7 +75,6 @@ impl LibraryModel {
 			}
 		}
 
-
 		let book_res = parse_book(&file, parent_uuid);
 		if  book_res.is_none() { return; }
 		let (book, cover_option) = book_res.unwrap();

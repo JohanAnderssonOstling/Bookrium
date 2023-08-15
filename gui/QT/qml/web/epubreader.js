@@ -1,24 +1,29 @@
 let book = null;
 let rendition = null;
 let currentCfi = null;
-console.log("epubreader.js loaded");
-alert("epubreader.js loaded");
 loadBook("file:///home/johan/Hem/Downloads/PDFBöcker/[9781732102200] John Ousterhout - A Philosophy of Software Design.epub", "")
 function loadBook(bookPath, epubCfi) {
-	alert("Loading book" + bookPath);
-	console.log("Loading book: " + bookPath);
 	book = ePub(bookPath);
 	rendition = book.renderTo("area");
-	alert(rendition);
 	if (epubCfi != null && epubCfi !== "") rendition.display(epubCfi);
 	else rendition.display();
 	book.ready.then(function () {
-		alert("Book ready");
 		rendition.on("relocated", function(location) {
 			currentCfi = location.start.cfi;
+			if(location.atEnd){
+				rendition.next();
+			}
+		});
+		rendition.on('rendered', function(section){
+			rendition.themes.default({
+				'body':{
+					'-webkit-column-count': '3',
+					'-moz-column-count': '3',
+					'column-count': '3',
+				}
+			});
 		});
 	})
-	alert("Book loaded");
 	nextChapter();
 }
 
@@ -38,7 +43,6 @@ function changeChapter(delta) {
 
 function nextChapter() {
 	changeChapter(1);
-	alert("Next chapter");
 }
 
 function prevPage() {

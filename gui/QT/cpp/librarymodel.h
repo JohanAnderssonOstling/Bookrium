@@ -28,6 +28,7 @@ public:
 	UUID = Qt::UserRole,
 	Name,
 	Path,
+	IsContainer,
 	HasCover,
 	Cover
     };

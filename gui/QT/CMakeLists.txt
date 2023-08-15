@@ -9,7 +9,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS true)
 
-find_package(Qt6 COMPONENTS Core Gui Qml QuickControls2 QmlImportScanner)
+find_package(Qt6 COMPONENTS Core Gui Qml QuickControls2 QmlImportScanner WebView)
 find_package(Corrosion REQUIRED)
 include(corrosion_cxx.cmake)
 
@@ -26,4 +26,4 @@ qt_add_executable(Castafiore
 add_library_rust(PATH rust/cxx_layer NAMESPACE castafiore_cxx)
 target_link_libraries(Castafiore
         PUBLIC castafiore_cxx::cxx_layer
-        PRIVATE Qt6::Quick Qt6::Core ssl bz2)
+        PRIVATE Qt6::Quick Qt6::Core Qt6::WebView ssl bz2)

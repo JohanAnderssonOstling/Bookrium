@@ -58,8 +58,8 @@ impl LibraryDBConn {
 	pub fn insert_book_dir(&self, book_uuid: &str, dir_uuid: &str) {
 		println!("Inserting {book_uuid} and {dir_uuid}");
 		match self.db.insert_book_dir(book_uuid, dir_uuid) {
-			Ok(_) => (),
-			Err(E) => (),
+			Ok(_) 	=> (),
+			Err(E) 	=> (),
 		}
 	}
 
@@ -77,10 +77,8 @@ impl LibraryDBConn {
 
 	pub fn insert_book(&self, parsed_book: ParseBook, scan_timestamp: u64) {
 		let book_uuid = parsed_book.book.uuid.as_str();
-
-
 		self.db.insert_book(
-			parsed_book.book.uuid.as_str(),
+			book_uuid,
 			parsed_book.name.as_str(),
 			parsed_book.book.progress.clone(),
 			parsed_book.mdata.pos.as_str(),
@@ -91,7 +89,6 @@ impl LibraryDBConn {
 			parsed_book.mdata.publ.clone(),
 			scan_timestamp,
 		).unwrap();
-
 		self.insert_containers("creator", book_uuid, parsed_book.authors);
 		self.insert_containers("subject", book_uuid, parsed_book.subjects);
 		self.insert_containers("publisher", book_uuid, parsed_book.publisher);

@@ -4,12 +4,13 @@
 #include "homemodel.h"
 #include "librarymodel.h"
 #include "epubmodel.h"
-
+#include <QtWebView/QtWebView>
 int main(int argc, char* argv[])
 {
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
     HomeModel homeModel;
+    QtWebView::initialize();
     QCoreApplication::setAttribute(Qt::AA_UseSoftwareOpenGL);    engine.rootContext()->setContextProperty("HomeModel", &homeModel);
     qmlRegisterType<LibraryModel>("johandost.LibraryModel", 1, 0, "LibraryModel");
     qmlRegisterType<EpubModel>("johandost.EpubModel", 1, 0, "EpubModel");

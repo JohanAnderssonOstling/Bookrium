@@ -20,6 +20,7 @@ pdf = "0.8.1"
 iter_tools = "0.1.4"
 uuid = "1.4.1"
 cxx = "1.0.83"
+html_parser = "0.7.0"
 
 [build-dependencies]
 cxx-build = "1.0.83"

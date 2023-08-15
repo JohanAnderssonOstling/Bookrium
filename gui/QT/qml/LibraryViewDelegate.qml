@@ -51,7 +51,7 @@ Column {
     function openMedia() {
 	let extension = path.split(".").pop();
 	if (extension === "pdf") return openPdf();
-	if (extension === "epub") return openNativeEpub();
+	if (extension === "epub") return openEpub();
     }
 
     function openPdf() {
