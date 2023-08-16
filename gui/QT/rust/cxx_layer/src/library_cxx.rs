@@ -24,6 +24,7 @@ fn get_media_files(uuid: &str, folder_uuid: &str) -> Vec<CXXBook> {
 	    uuid: file.uuid,
 	    title: file.title,
 	    progress: file.progress,
+
 	});
     }
     media_files
@@ -61,6 +62,13 @@ fn get_cover_path(library_uuid: &str, file_uuid: &str) -> String {
     cover_path.unwrap()
 }
 
+fn get_container_cover_path(library_uuid: &str, container_uuid: &str) -> String {
+	let mut library_lock = LIBRARIES.lock().unwrap();
+	let library = library_lock.get_mut(library_uuid).unwrap();
+	let cover_path = library.get_container_cover_path(container_uuid);
+	if cover_path.is_none () { return "".into(); }
+	cover_path.unwrap()
+}
 
 fn convert_dir(dirs: Vec<library_types::Dir>) -> Vec<Dir> {
     dirs.into_iter().map(|dir| Dir {
@@ -101,5 +109,6 @@ mod library_ffi {
 	fn get_media_position(library_uuid: &str, file_uuid: &str) -> String;
 	fn has_cover(library_uuid: &str, file_uuid: &str) -> bool;
 	fn get_cover_path(library_uuid: &str, file_uuid: &str) -> String;
+	fn get_container_cover_path(library_uuid: &str, container_uuid: &str) -> String;
     }
 }

@@ -20,9 +20,7 @@ QVariant LibraryModel::data(const QModelIndex &index, int role) const {
 }
 
 QVariant LibraryModel::bookData(int row, int role) const {
-	qInfo() << "Getting book at row:" << row;
   const CXXBook book = books.at(row);
-  qInfo() << "Book:" << row;
   switch (role) {
     case UUID: return asQStr (book.uuid);
     case Name: return asQStr (book.title);
@@ -39,8 +37,9 @@ QVariant LibraryModel::dirData(int row, int role) const {
     case UUID: return asQStr (dir.uuid);
     case Name: return asQStr (dir.name);
 	case IsContainer: return true;
-    case HasCover: return false;
-    case Cover: return "";
+    case Path: return "dir";
+    case HasCover: return true;
+    case Cover: return asQStr(get_container_cover_path (library_uuid, dir.uuid));
   }
 }
 int LibraryModel::rowCount(const QModelIndex &parent) const {

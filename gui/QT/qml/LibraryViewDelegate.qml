@@ -14,8 +14,9 @@ Column {
     height: coverHeight
     Layout.fillWidth: true
 
-   Image {
-	id: 		image
+
+    Image {
+	id: 		bookCover
 	visible: 	hasCover
 	source: 	"file://" + cover
 	asynchronous: 	true
@@ -25,7 +26,7 @@ Column {
 	}
     }
 
-    Rectangle {
+    /*Rectangle {
 	id: libraryFolder
 	visible: !hasCover
 	width: coverWidth
@@ -35,7 +36,7 @@ Column {
 	    anchors.fill: parent
 	    onClicked: openDir()
 	}
-    }
+    }*/
 
     Text {
 	width:parent.width;	height:40
@@ -46,10 +47,14 @@ Column {
     }
 
     function openDir() {
+	console.log("openDir")
 	libraryModel.enterDir(index)
     }
     function openMedia() {
-	let extension = path.split(".").pop();
+	console.log("path: " + path)
+	let split_path = path.split(".");
+	if (split_path.length === 1) return openDir();
+	let extension = split_path.pop();
 	if (extension === "pdf") return openPdf();
 	if (extension === "epub") return openEpub();
     }

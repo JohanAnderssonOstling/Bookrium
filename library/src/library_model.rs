@@ -106,5 +106,13 @@ impl LibraryModel {
 		if !path.exists() {return None;}
 		Some(path.to_str().unwrap().to_string())
 	}
+
+	pub fn get_container_cover_path (&self, container_uuid: &str) -> Option<String>{
+		let books = self.get_books(container_uuid);
+		if books.len() == 0 {return None;}
+		let cover_path = self.get_cover_path(books[0].uuid.as_str());
+		println!("cover_path: {:?}", cover_path);
+		cover_path
+	}
 }
 

@@ -10,9 +10,6 @@ function loadBook(bookPath, epubCfi) {
 	book.ready.then(function () {
 		rendition.on("relocated", function(location) {
 			currentCfi = location.start.cfi;
-			if(location.atEnd){
-				rendition.next();
-			}
 		});
 		rendition.on('rendered', function(section){
 			rendition.themes.default({
@@ -47,17 +44,10 @@ function nextChapter() {
 
 function prevPage() {
     rendition.prev();
-	
 }
 
 function nextPage() {
     rendition.next();
-	rendition.on("relocated", function(location) {
-		// Update the current cfi whenever the location is changed
-		console.log(location.start.cfi);
-	});
-	console.log(currentCfi);
-	return "hello test from";
 }
 
 function get_cfi() {
