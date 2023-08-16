@@ -2,18 +2,21 @@ import QtQuick 2.9
 import QtQuick.Controls 2.5
 import QtWebView 1.1
 import QtQuick.Layouts 1.3
-
-ColumnLayout {
+import johandost.TocModel 1.0
+RowLayout {
     property bool showAddButton: false
     property bool showBackButton: true
     property string bookUrl
     property string epubCfi
     property string bookUUID;
     property string title: "Epub Reader"
+    property string libraryUUID
 
-    function loadEpub(bookPath, bookUUID) {
+    function loadEpub(bookPath, bookUUID, libraryUUID) {
 	this.bookUUID = bookUUID;
+	this.libraryUUID = libraryUUID;
 	this.bookUrl = "file://" + bookPath;
+	tocModel.setToc(libraryModel.getLibraryUuid(), bookUUID);
     }
 
     function backButtonPressed() {
@@ -23,6 +26,32 @@ ColumnLayout {
 	});
 	stackView.pop();
     }
+
+	ListView {
+	width: 200
+	    Layout.fillHeight: true
+	model: TocModel {id : tocModel; }
+	    delegate: Component {
+		Item {
+		    width: parent.width
+		    height: nameText.height + 10
+		    Text {
+			id: nameText
+			text: model.name
+			font.pixelSize: 16
+			color: "blue"
+			MouseArea {
+			    id: mouseArea
+			    anchors.fill: parent
+			    cursorShape: Qt.PointingHandCursor
+			    onClicked: {
+				set_cfi(model.href);
+			    }
+			}
+		    }
+		}
+	    }
+	}
 
     WebView {
 	id: epubWebView
@@ -51,5 +80,8 @@ ColumnLayout {
 	    else epubWebView.runJavaScript("prevPage()");
 	    event.accepted = true;
 	}
+    }
+    function set_cfi(cfi) {
+	epubWebView.runJavaScript("set_cfi(\"" + cfi + "\");");
     }
 }

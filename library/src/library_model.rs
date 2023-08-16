@@ -36,6 +36,10 @@ impl LibraryModel {
 		self.db.get_book_path(book_uuid, &self.path)
 	}
 
+	pub fn get_book_toc(&self, book_uuid: &str) -> Contents {
+		self.db.get_book_toc(book_uuid)
+	}
+
 	pub fn get_dirs(&self, parent_uuid: &str) -> Dirs {
 		self.db.get_dirs(parent_uuid)
 	}
@@ -100,16 +104,16 @@ impl LibraryModel {
 		self.db.get_pos(uuid)
 	}
 
-	pub fn get_cover_path (&self, book_uuid: &str) -> Option<String> {
+	pub fn get_cover_path (&self, book_uuid: &str) -> String {
 		let path_str = format!("{}/{book_uuid}/256.jpg", self.meta_path);
 		let path = Path::new(&path_str);
-		if !path.exists() {return None;}
-		Some(path.to_str().unwrap().to_string())
+		if !path.exists() {return "".into();}
+		path.to_str().unwrap().to_string()
 	}
 
-	pub fn get_container_cover_path (&self, container_uuid: &str) -> Option<String>{
+	pub fn get_container_cover_path (&self, container_uuid: &str) -> String{
 		let books = self.get_books(container_uuid);
-		if books.len() == 0 {return None;}
+		if books.len() == 0 {return "".into();}
 		let cover_path = self.get_cover_path(books[0].uuid.as_str());
 		println!("cover_path: {:?}", cover_path);
 		cover_path

@@ -8,10 +8,11 @@ ColumnLayout {
     property bool showAddButton: true
     property bool showBackButton: true
     property string title: "Library"
-    property string library_uuid: ""
+    property string library_uuid
 
 
     function initLibraryModel(uuid, path) {
+	this.library_uuid = uuid;
 	libraryModel.openLibrary(uuid, path)
     }
 
@@ -87,6 +88,7 @@ ColumnLayout {
 	    delegate: LibraryViewDelegate {
 		coverWidth: libraryGrid.coverWidth
 		coverHeight: libraryGrid.coverWidth * 1.6
+		library_uuid: library_uuid
 	    }
 
 	}

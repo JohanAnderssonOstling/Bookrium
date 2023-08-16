@@ -44,6 +44,10 @@ FROM book
 JOIN book_dir ON book.uuid = book_dir.book_uuid
 WHERE book.uuid = :book_uuid LIMIT 1;
 
+-- name: get_book_toc?
+-- param: book_uuid: &str
+SELECT navigation FROM book WHERE uuid = :book_uuid;
+
 
 -- DIRS --------------------------------------------------------
 

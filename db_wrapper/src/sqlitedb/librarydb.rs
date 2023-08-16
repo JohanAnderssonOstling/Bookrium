@@ -181,6 +181,14 @@ impl LibraryDBConn {
 		}).expect("Error getting media position");
 		position
 	}
+	pub fn get_book_toc(&self, book_uuid: &str) -> Contents {
+		let mut contents: Contents = Vec::new();
+		self.db.get_book_toc(book_uuid, |row| {
+			contents  = deserialize_toc(row);
+			Ok(())
+		}).expect("Error getting toc");
+		contents
+	}
 
 }
 
@@ -196,6 +204,11 @@ fn deserialize_book(row: &Row) -> rusqlite::Result<LibBook> {
 		title: row.get(1).unwrap(),
 		progress: row.get(2).unwrap(),
 	})
+}
+
+fn deserialize_toc(row: &Row) -> Contents {
+	let json: String = row.get(0).unwrap();
+	from_str(json.as_str()).unwrap()
 }
 
 fn create_schema (db: Connection) -> Connection{

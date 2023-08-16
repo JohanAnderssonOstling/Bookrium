@@ -24,10 +24,10 @@ QVariant LibraryModel::bookData(int row, int role) const {
   switch (role) {
     case UUID: return asQStr (book.uuid);
     case Name: return asQStr (book.title);
-    case Path: return asQStr (get_book_path (library_uuid, book.uuid) );
+    case Path: return asQStr (get_book_path(library_uuid, book.uuid));
 	case IsContainer: return false;
-    case HasCover: return has_cover (library_uuid, book.uuid);
-    case Cover: return asQStr (get_cover_path (library_uuid, book.uuid));
+    case HasCover: return !book.cover_path.empty();
+    case Cover: return asQStr (book.cover_path);
   }
 }
 
@@ -38,8 +38,8 @@ QVariant LibraryModel::dirData(int row, int role) const {
     case Name: return asQStr (dir.name);
 	case IsContainer: return true;
     case Path: return "dir";
-    case HasCover: return true;
-    case Cover: return asQStr(get_container_cover_path (library_uuid, dir.uuid));
+    case HasCover: return !dir.cover_path.empty();
+    case Cover: return asQStr (dir.cover_path);
   }
 }
 int LibraryModel::rowCount(const QModelIndex &parent) const {
@@ -87,4 +87,8 @@ bool LibraryModel::prevDir() {
   dir_stack.pop();
   updateMediaFiles();
   return true;
+}
+
+QString LibraryModel::getLibraryUuid() {
+	return asQStr(this->library_uuid);
 }

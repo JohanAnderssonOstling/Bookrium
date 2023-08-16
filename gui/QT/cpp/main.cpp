@@ -4,6 +4,7 @@
 #include "homemodel.h"
 #include "librarymodel.h"
 #include "epubmodel.h"
+#include "tocmodel.h"
 #include <QtWebView/QtWebView>
 int main(int argc, char* argv[])
 {
@@ -14,7 +15,7 @@ int main(int argc, char* argv[])
     QCoreApplication::setAttribute(Qt::AA_UseSoftwareOpenGL);    engine.rootContext()->setContextProperty("HomeModel", &homeModel);
     qmlRegisterType<LibraryModel>("johandost.LibraryModel", 1, 0, "LibraryModel");
     qmlRegisterType<EpubModel>("johandost.EpubModel", 1, 0, "EpubModel");
-
+    qmlRegisterType<TocModel>("johandost.TocModel", 1, 0, "TocModel");
     const QUrl url(QStringLiteral("../qml/main.qml"));
     QObject::connect(&engine,&QQmlApplicationEngine::objectCreated,&app,
             [url](QObject* obj, const QUrl& objUrl) {

@@ -20,11 +20,10 @@ fn get_media_files(uuid: &str, folder_uuid: &str) -> Vec<CXXBook> {
     let mut media_files = Vec::new();
 
     for file in files {
-	media_files.push(CXXBook {
-	    uuid: file.uuid,
-	    title: file.title,
-	    progress: file.progress,
-
+		let cover_path = library.get_cover_path(file.uuid.as_str());
+		media_files.push(CXXBook {
+	    uuid: file.uuid, 	title: file.title, 	progress: file.progress,
+		cover_path,
 	});
     }
     media_files
@@ -48,39 +47,13 @@ fn get_media_position(library_uuid: &str, file_uuid: &str) -> String {
     library.get_pos(file_uuid)
 }
 
-fn has_cover(library_uuid: &str, file_uuid: &str) -> bool {
-    let mut library_lock = LIBRARIES.lock().unwrap();
-    let library = library_lock.get_mut(library_uuid).unwrap();
-    library.get_cover_path(file_uuid).is_some()
-}
-
-fn get_cover_path(library_uuid: &str, file_uuid: &str) -> String {
-    let mut library_lock = LIBRARIES.lock().unwrap();
-    let library = library_lock.get_mut(library_uuid).unwrap();
-    let cover_path = library.get_cover_path(file_uuid);
-    if cover_path.is_none () { return "".into(); }
-    cover_path.unwrap()
-}
-
-fn get_container_cover_path(library_uuid: &str, container_uuid: &str) -> String {
-	let mut library_lock = LIBRARIES.lock().unwrap();
-	let library = library_lock.get_mut(library_uuid).unwrap();
-	let cover_path = library.get_container_cover_path(container_uuid);
-	if cover_path.is_none () { return "".into(); }
-	cover_path.unwrap()
-}
-
-fn convert_dir(dirs: Vec<library_types::Dir>) -> Vec<Dir> {
-    dirs.into_iter().map(|dir| Dir {
-	uuid: dir.uuid,
-	name: dir.name,
-    }).collect()
-}
-
 fn get_dirs(library_uuid: &str, parent_uuid: &str) -> Vec<Dir> {
     let mut library_lock = LIBRARIES.lock().unwrap();
     let library = library_lock.get_mut(library_uuid).unwrap();
-    convert_dir(library.get_dirs(parent_uuid))
+	library.get_dirs(parent_uuid).into_iter().map(|dir| {
+		let cover_path = library.get_container_cover_path(dir.uuid.as_str());
+		Dir { uuid: dir.uuid, name: dir.name, cover_path, }
+	}).collect()
 }
 
 fn get_book_path(uuid: &str, book_uuid: &str) -> String {
@@ -89,15 +62,27 @@ fn get_book_path(uuid: &str, book_uuid: &str) -> String {
     library.get_book_path(book_uuid)
 }
 
+fn get_book_toc(library_uuid: &str, book_uuid: &str) -> Vec<Nav>{
+	let mut library_lock = LIBRARIES.lock().unwrap();
+	let library = library_lock.get_mut(library_uuid).unwrap();
+	let contents = library.get_book_toc(book_uuid);
+	contents.into_iter().map(|nav| {
+		Nav {name: nav.name, href: nav.href}
+	}).collect()
+}
+
 #[cxx::bridge]
 mod library_ffi {
     pub struct CXXBook {
-	pub uuid: String, pub title: String, pub progress: u8,
+	pub uuid: String, pub title: String, pub progress: u8, pub cover_path: String,
     }
 
     pub struct Dir {
-	pub uuid: String, pub name: String,
+	pub uuid: String, pub name: String, pub cover_path: String,
     }
+	pub struct Nav {
+		pub name: String, pub href: String,
+	}
 
     extern "Rust" {
 	fn get_media_files(uuid: &str, folder_uuid: &str) -> Vec<CXXBook>;
@@ -105,10 +90,8 @@ mod library_ffi {
 	fn scan_library(uuid: &str, path: &str);
 	fn open_library(uuid: &str, path: &str);
 	fn get_book_path(library_uuid: &str, book_uuid: &str) -> String;
+	fn get_book_toc(library_uuid: &str, book_uuid: &str) -> Vec<Nav>;
 	fn set_media_position(library_uuid: &str, file_uuid: &str, position: &str);
 	fn get_media_position(library_uuid: &str, file_uuid: &str) -> String;
-	fn has_cover(library_uuid: &str, file_uuid: &str) -> bool;
-	fn get_cover_path(library_uuid: &str, file_uuid: &str) -> String;
-	fn get_container_cover_path(library_uuid: &str, container_uuid: &str) -> String;
     }
 }

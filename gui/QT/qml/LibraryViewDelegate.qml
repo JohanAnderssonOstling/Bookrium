@@ -9,7 +9,7 @@ Column {
     id: column
     property int coverWidth
     property int coverHeight
-
+    property string library_uuid
     width:coverWidth
     height: coverHeight
     Layout.fillWidth: true
@@ -53,7 +53,7 @@ Column {
     function openMedia() {
 	console.log("path: " + path)
 	let split_path = path.split(".");
-	if (split_path.length === 1) return openDir();
+	if (split_path.length === 1) return libraryModel.enterDir(index);
 	let extension = split_path.pop();
 	if (extension === "pdf") return openPdf();
 	if (extension === "epub") return openEpub();
@@ -79,7 +79,7 @@ Column {
 	let epubReaderComp = Qt.createComponent("EpubReader.qml");
 	if (epubReaderComp.status === Component.Ready) {
 	    let epubReader = epubReaderComp.createObject(parent);
-	    epubReader.loadEpub(path, uuid);
+	    epubReader.loadEpub(path, uuid, library_uuid);
 	    stackView.push(epubReader);
 	} else {
 	    console.log("error loading component");

@@ -21,7 +21,9 @@ qt_add_executable(Castafiore
         qml/main.qml qml/HomeView.qml qml/HomeViewDelegate.qml
         qml/LibraryView.qml qml/LibraryViewDelegate.qml qml/PDFReader.qml qml/EpubReader.qml
         cpp/epubmodel.h
-        cpp/epubmodel.cpp)
+        cpp/epubmodel.cpp
+        cpp/tocmodel.cpp
+        cpp/tocmodel.h)
 
 add_library_rust(PATH rust/cxx_layer NAMESPACE castafiore_cxx)
 target_link_libraries(Castafiore

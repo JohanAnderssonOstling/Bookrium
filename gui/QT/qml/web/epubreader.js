@@ -1,7 +1,7 @@
 let book = null;
 let rendition = null;
 let currentCfi = null;
-loadBook("file:///home/johan/Hem/Downloads/PDFBöcker/[9781732102200] John Ousterhout - A Philosophy of Software Design.epub", "")
+//loadBook("file:///home/johan/Hem/Downloads/PDFBöcker/[9781732102200] John Ousterhout - A Philosophy of Software Design.epub", "")
 function loadBook(bookPath, epubCfi) {
 	book = ePub(bookPath);
 	rendition = book.renderTo("area");

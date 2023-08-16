@@ -46,4 +46,5 @@ public slots:
     QString getMediaPosition(const QString &uuid);
     void enterDir(int index);
     bool prevDir();
+	QString getLibraryUuid();
 };
