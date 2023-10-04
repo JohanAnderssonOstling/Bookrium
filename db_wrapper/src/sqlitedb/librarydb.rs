@@ -36,7 +36,7 @@ impl LibraryDBConn {
 		self.insert_dir("root", "None", "/");
 	}
 
-	fn get_dir_path(&self, dir_uuid: &str) -> String {
+	pub fn get_dir_path(&self, dir_uuid: &str) -> String {
 		let mut path: String = String::new();
 		self.db.select_dir(dir_uuid, |row| {
 			let name: String = row.get(2).unwrap();
@@ -92,6 +92,14 @@ impl LibraryDBConn {
 		self.insert_containers("creator", book_uuid, parsed_book.authors);
 		self.insert_containers("subject", book_uuid, parsed_book.subjects);
 		self.insert_containers("publisher", book_uuid, parsed_book.publisher);
+	}
+
+	pub fn delete_book(&self, book_uuid: &str) -> rusqlite::Result<(usize), rusqlite::Error>{
+		self.db.delete_book(book_uuid)
+	}
+
+	pub fn delete_dir(&self, dir_uuid: &str) -> rusqlite::Result<usize, rusqlite::Error>{
+		self.db.delete_dir(dir_uuid)
 	}
 
 	fn insert_containers(&self, table_name: &str, book_uuid: &str, containers: Vec<String>) {

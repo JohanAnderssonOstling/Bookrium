@@ -28,6 +28,11 @@ VALUES
   (:uuid,:file_name,:progress,:position,:navigation,
    :title,:desc,:identifiers,:published,:scan_timestamp);
 
+--name: 	delete_book!
+--# Parameters
+--param: 	uuid: &str
+DELETE FROM book WHERE uuid = :uuid;
+
 -- name: 	get_books?
 --#Parameters
 -- param: 	dir_uuid: 	&str
@@ -57,6 +62,11 @@ SELECT navigation FROM book WHERE uuid = :book_uuid;
 -- param: parent_uuid: 	&str
 INSERT INTO dir ( dir_uuid, dir_name, parent_uuid)
 VALUES 		(:dir_uuid,:name,:parent_uuid);
+
+--name: 	delete_dir!
+--# Parameters
+--param: 	dir_uuid: &str
+DELETE FROM dir WHERE dir_uuid = :dir_uuid;
 
 -- name: get_dirs?
 -- # Parameters

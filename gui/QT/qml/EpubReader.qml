@@ -14,7 +14,6 @@ RowLayout {
 
     function loadEpub(bookPath, bookUUID, libraryUUID) {
 	this.bookUUID = bookUUID;
-	this.libraryUUID = libraryUUID;
 	this.bookUrl = "file://" + bookPath;
 	tocModel.setToc(libraryModel.getLibraryUuid(), bookUUID);
     }
@@ -27,9 +26,9 @@ RowLayout {
 	stackView.pop();
     }
 
-	ListView {
+    ListView {
 	width: 200
-	    Layout.fillHeight: true
+	Layout.fillHeight: true
 	model: TocModel {id : tocModel; }
 	    delegate: Component {
 		Item {

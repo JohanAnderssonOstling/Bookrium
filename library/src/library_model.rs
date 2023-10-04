@@ -1,3 +1,4 @@
+use std::error::Error;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::*;
@@ -14,11 +15,14 @@ pub struct LibraryModel {
 	pub path: 	String,
 	meta_path: 	String,
 }
-
+//gljlkjlkj
 impl LibraryModel {
 	pub fn open(uuid: &str, path: &str) -> Self {
 		let meta_path 	= format!("{path}/.bookrium");
-		fs::create_dir_all(&meta_path).unwrap();
+		match fs::create_dir_all(&meta_path) {
+			Ok(_) => {},
+			Err(err) => {println!("Error creating meta dir: {}", err)},
+		}
 		let db_path		= format!("{meta_path}/library.db");
 		Self {
 			db: 	LibraryDBConn::new(db_path.as_str()),
@@ -48,6 +52,33 @@ impl LibraryModel {
 		let scan_path = PathBuf::from(path);
 		self.db.clear_dirs();
 		self.scan_lib_aux(scan_path, "root");
+	}
+
+	pub fn delete_book(&self, book_uuid: &str) -> String{
+		let book_path = self.get_book_path(book_uuid);
+		match self.db.delete_book(book_uuid){
+			Ok(_) => {},
+			Err(err) => {return format!{"Error deleting book: {}", err};}
+		}
+		match std::fs::remove_file(book_path){
+			Ok(_) => {},
+			Err(err) => {return format!{"Error deleting book: {}", err};}
+		}
+		"".into()
+	}
+
+	pub fn delete_dir(&self, dir_uuid: &str) -> String{
+		let dir_path = self.db.get_dir_path(dir_uuid);
+		match self.db.delete_dir(dir_uuid){
+			Ok(_) => {},
+			Err(err) => {return format!{"Error deleting dir: {}", err};}
+		}
+		match std::fs::remove_dir_all(&dir_path){
+			Ok(_) => {},
+			Err(err) => {return format!{"Error deleting dir: {}, {}", &dir_path ,err};}
+		}
+
+		"".into()
 	}
 
 	fn scan_lib_aux(&self, scan_path: PathBuf, parent_uuid: &str) {
@@ -113,10 +144,11 @@ impl LibraryModel {
 
 	pub fn get_container_cover_path (&self, container_uuid: &str) -> String{
 		let books = self.get_books(container_uuid);
-		if books.len() == 0 {return "".into();}
-		let cover_path = self.get_cover_path(books[0].uuid.as_str());
-		println!("cover_path: {:?}", cover_path);
-		cover_path
+		for book in books {
+			let cover_path = self.get_cover_path(book.uuid.as_str());
+			if cover_path.len() > 0 {return cover_path;}
+		}
+		"".into()
 	}
 }
 

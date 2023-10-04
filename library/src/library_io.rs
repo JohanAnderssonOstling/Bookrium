@@ -29,7 +29,6 @@ pub fn scan_dir(path: &PathBuf) -> (Vec<PathBuf>, Vec<PathBuf>) {
 		})
 }
 
-
 pub fn create_thumbnails(path: String, image_data: Vec<u8>){
 	std::fs::create_dir_all(&path).unwrap();
 	let image = Reader::new(Cursor::new(&image_data)).with_guessed_format().unwrap().decode().unwrap();

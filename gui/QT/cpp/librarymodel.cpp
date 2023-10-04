@@ -11,7 +11,6 @@ void LibraryModel::openLibrary(const QString &uuid, const QString &path) {
   updateMediaFiles();
 }
 
-
 QVariant LibraryModel::data(const QModelIndex &index, int role) const {
   qInfo() << "data" << index.row() << role;
   int row = index.row();
@@ -42,6 +41,7 @@ QVariant LibraryModel::dirData(int row, int role) const {
     case Cover: return asQStr (dir.cover_path);
   }
 }
+
 int LibraryModel::rowCount(const QModelIndex &parent) const {
   return dirs.size() + books.size();
 }
@@ -91,4 +91,15 @@ bool LibraryModel::prevDir() {
 
 QString LibraryModel::getLibraryUuid() {
 	return asQStr(this->library_uuid);
+}
+
+QString LibraryModel::deleteBook(const QString &uuid) {
+	QString result = asQStr(delete_book(this->library_uuid, asRustStr(uuid)));
+  updateMediaFiles();
+  return result;
+}
+QString LibraryModel::deleteDir(const QString &uuid) {
+  QString result = asQStr(delete_dir(this->library_uuid, asRustStr(uuid)));
+  updateMediaFiles();
+  return result;
 }

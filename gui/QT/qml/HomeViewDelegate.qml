@@ -3,6 +3,10 @@ import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 
 Column{
+    Menu {
+	id: homeContextMenu
+	MenuItem {text: "Delete"}
+    }
     Rectangle{
 	anchors.horizontalCenter: parent.horizontalCenter
 	width: 200
@@ -16,7 +20,7 @@ Column{
 		    openLibrary();
 		}
 		else if(mouse.button & Qt.RightButton){
-		    HomeModel.deleteLibrary(model.uuid);
+		    homeContextMenu.popup()
 		}}
 	}
     }

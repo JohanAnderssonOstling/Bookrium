@@ -71,6 +71,18 @@ fn get_book_toc(library_uuid: &str, book_uuid: &str) -> Vec<Nav>{
 	}).collect()
 }
 
+fn delete_book(library_uuid: &str, book_uuid: &str) -> String {
+	let mut library_lock = LIBRARIES.lock().unwrap();
+	let library = library_lock.get_mut(library_uuid).unwrap();
+	library.delete_book(book_uuid)
+}
+
+fn delete_dir(library_uuid: &str, dir_uuid: &str) -> String {
+	let mut library_lock = LIBRARIES.lock().unwrap();
+	let library = library_lock.get_mut(library_uuid).unwrap();
+	library.delete_dir(dir_uuid)
+}
+
 #[cxx::bridge]
 mod library_ffi {
     pub struct CXXBook {
@@ -93,5 +105,7 @@ mod library_ffi {
 	fn get_book_toc(library_uuid: &str, book_uuid: &str) -> Vec<Nav>;
 	fn set_media_position(library_uuid: &str, file_uuid: &str, position: &str);
 	fn get_media_position(library_uuid: &str, file_uuid: &str) -> String;
-    }
+    fn delete_book(library_uuid: &str, book_uuid: &str) -> String;
+		fn delete_dir(library_uuid: &str, dir_uuid: &str) -> String;
+	}
 }

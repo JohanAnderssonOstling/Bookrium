@@ -8,11 +8,9 @@ ColumnLayout {
     property bool showAddButton: true
     property bool showBackButton: true
     property string title: "Library"
-    property string library_uuid
 
 
     function initLibraryModel(uuid, path) {
-	this.library_uuid = uuid;
 	libraryModel.openLibrary(uuid, path)
     }
 
@@ -80,15 +78,14 @@ ColumnLayout {
 	    Layout.fillWidth:  	true
 	    Layout.fillHeight: 	true
 	    property int coverWidth: 	256
-	    cellWidth: 	coverWidth
-	    cellHeight: coverWidth * 1.6 + 40
+	    cellWidth: 	coverWidth + 24
+	    cellHeight: coverWidth * 1.6 + 60
 	    clip: 	true
 	    ScrollBar.vertical: ScrollBar {}
 
 	    delegate: LibraryViewDelegate {
 		coverWidth: libraryGrid.coverWidth
 		coverHeight: libraryGrid.coverWidth * 1.6
-		library_uuid: library_uuid
 	    }
 
 	}
