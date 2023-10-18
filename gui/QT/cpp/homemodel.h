@@ -31,6 +31,6 @@ public:
 public slots:
     void createLibrary(QString name);
     void openLibrary(int row);
-    void deleteLibrary(int row);
+    void deleteLibrary(const QString &uuid);
 };
 

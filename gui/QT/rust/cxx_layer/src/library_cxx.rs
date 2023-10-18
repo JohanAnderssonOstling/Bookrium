@@ -35,10 +35,10 @@ fn scan_library(uuid: &str, path: &str) {
     library.scan_lib(path);
 }
 
-fn set_media_position(library_uuid: &str, file_uuid: &str, position: &str) {
+fn set_media_position(library_uuid: &str, file_uuid: &str, position: &str, progress: u8) {
     let mut library_lock = LIBRARIES.lock().unwrap();
     let library = library_lock.get_mut(library_uuid).unwrap();
-    (library.set_pos(file_uuid, position));
+    library.set_pos(file_uuid, position, progress);
 }
 
 fn get_media_position(library_uuid: &str, file_uuid: &str) -> String {
@@ -103,7 +103,7 @@ mod library_ffi {
 	fn open_library(uuid: &str, path: &str);
 	fn get_book_path(library_uuid: &str, book_uuid: &str) -> String;
 	fn get_book_toc(library_uuid: &str, book_uuid: &str) -> Vec<Nav>;
-	fn set_media_position(library_uuid: &str, file_uuid: &str, position: &str);
+	fn set_media_position(library_uuid: &str, file_uuid: &str, position: &str, progress: u8);
 	fn get_media_position(library_uuid: &str, file_uuid: &str) -> String;
     fn delete_book(library_uuid: &str, book_uuid: &str) -> String;
 		fn delete_dir(library_uuid: &str, dir_uuid: &str) -> String;

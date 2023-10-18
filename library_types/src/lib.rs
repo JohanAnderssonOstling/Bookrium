@@ -4,7 +4,6 @@ pub mod epub_type;
 use std::path::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use time::Date;
 macro_rules! stru {
     ($name:ident {$($field:ident: $t:ty,)*}) => {
         #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Default)]

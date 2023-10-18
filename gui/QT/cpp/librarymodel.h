@@ -27,6 +27,7 @@ public:
     enum Roles {
 	UUID = Qt::UserRole,
 	Name,
+	Progress,
 	Path,
 	IsContainer,
 	HasCover,
@@ -42,7 +43,7 @@ public slots:
     void scanLibrary();
     void updateMediaFiles();
     void openLibrary(const QString &path, const QString &uuid);
-    void setMediaPosition(const QString &uuid, const QString &location);
+    void setMediaPosition(const QString &uuid, const QString &location, int progress);
     QString getMediaPosition(const QString &uuid);
     void enterDir(int index);
     bool prevDir();

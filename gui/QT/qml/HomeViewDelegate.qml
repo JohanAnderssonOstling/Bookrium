@@ -5,7 +5,12 @@ import QtQuick.Layouts 1.3
 Column{
     Menu {
 	id: homeContextMenu
-	MenuItem {text: "Delete"}
+	MenuItem {
+	    text: "Delete"
+	    onTriggered: {
+		HomeModel.deleteLibrary(uuid);
+	    }
+	}
     }
     Rectangle{
 	anchors.horizontalCenter: parent.horizontalCenter

@@ -23,9 +23,8 @@ create table if not exists creator(
 
 -- name: create_book_creator_table!
 create table if not exists book_creator(
-  book_uuid    TEXT references book,
-  container_uuid TEXT references creator,
-  primary key (book_uuid, container_uuid)
+  book_uuid    TEXT,
+  container_uuid TEXT
 
 );
 
@@ -38,9 +37,8 @@ create table if not exists dir (
 
 -- name: create_book_dir_table!
 create table if not exists book_dir (
-  book_uuid TEXT references book on delete cascade,
-  dir_uuid  TEXT references dir  on delete cascade,
-  primary key (book_uuid, dir_uuid)
+  book_uuid TEXT,
+  dir_uuid  TEXT
 );
 
 -- name: create_subject_table!

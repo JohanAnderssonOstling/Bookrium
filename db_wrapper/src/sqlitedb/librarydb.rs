@@ -1,5 +1,3 @@
-use std::fmt::format;
-use std::path::{PathBuf};
 use library_types::*;
 use include_sqlite_sql::{include_sql, impl_sql};
 use rusqlite::*;
@@ -56,11 +54,7 @@ impl LibraryDBConn {
 	}
 
 	pub fn insert_book_dir(&self, book_uuid: &str, dir_uuid: &str) {
-		println!("Inserting {book_uuid} and {dir_uuid}");
-		match self.db.insert_book_dir(book_uuid, dir_uuid) {
-			Ok(_) 	=> (),
-			Err(E) 	=> (),
-		}
+		if self.db.insert_book_dir(book_uuid, dir_uuid).is_ok() {  }
 	}
 
 	// BOOKS ---------------------------------------------------
@@ -94,7 +88,7 @@ impl LibraryDBConn {
 		self.insert_containers("publisher", book_uuid, parsed_book.publisher);
 	}
 
-	pub fn delete_book(&self, book_uuid: &str) -> rusqlite::Result<(usize), rusqlite::Error>{
+	pub fn delete_book(&self, book_uuid: &str) -> rusqlite::Result<usize, rusqlite::Error>{
 		self.db.delete_book(book_uuid)
 	}
 
@@ -177,8 +171,8 @@ impl LibraryDBConn {
 	}
 
 
-	pub fn set_pos(&self, uuid: &str, pos: &str) {
-		self.db.set_pos(uuid, pos).unwrap();
+	pub fn set_pos(&self, uuid: &str, pos: &str, progress: u8) {
+		self.db.set_pos(uuid, pos, progress).unwrap();
 	}
 
 	pub fn get_pos(&self, uuid: &str) -> String {

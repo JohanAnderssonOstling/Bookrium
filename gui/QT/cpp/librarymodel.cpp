@@ -12,7 +12,6 @@ void LibraryModel::openLibrary(const QString &uuid, const QString &path) {
 }
 
 QVariant LibraryModel::data(const QModelIndex &index, int role) const {
-  qInfo() << "data" << index.row() << role;
   int row = index.row();
   if (row >= dirs.size()) return bookData(row - dirs.size(), role);
   else return dirData(row, role);
@@ -21,24 +20,26 @@ QVariant LibraryModel::data(const QModelIndex &index, int role) const {
 QVariant LibraryModel::bookData(int row, int role) const {
   const CXXBook book = books.at(row);
   switch (role) {
-    case UUID: return asQStr (book.uuid);
-    case Name: return asQStr (book.title);
-    case Path: return asQStr (get_book_path(library_uuid, book.uuid));
+    case UUID: 		return asQStr (book.uuid);
+    case Name: 		return asQStr (book.title);
+    case Path: 		return asQStr (get_book_path(library_uuid, book.uuid));
 	case IsContainer: return false;
-    case HasCover: return !book.cover_path.empty();
-    case Cover: return asQStr (book.cover_path);
+	case Progress: 	return book.progress;
+    case HasCover: 	return !book.cover_path.empty();
+    case Cover: 	return asQStr (book.cover_path);
   }
 }
 
 QVariant LibraryModel::dirData(int row, int role) const {
   const Dir dir = dirs.at(row);
   switch (role) {
-    case UUID: return asQStr (dir.uuid);
-    case Name: return asQStr (dir.name);
+    case UUID: 		return asQStr (dir.uuid);
+    case Name: 		return asQStr (dir.name);
 	case IsContainer: return true;
-    case Path: return "dir";
-    case HasCover: return !dir.cover_path.empty();
-    case Cover: return asQStr (dir.cover_path);
+    case Path: 		return "dir";
+	case Progress: 	return 0;
+    case HasCover: 	return !dir.cover_path.empty();
+    case Cover: 	return asQStr (dir.cover_path);
   }
 }
 
@@ -51,7 +52,8 @@ int LibraryModel::columnCount(const QModelIndex &parent) const { return 1; }
 QHash<int, QByteArray> LibraryModel::roleNames() const {
   return {{UUID,     "uuid"},
           {Name,     "name"},
-          {Path,     "path"},
+		  {Progress, "progress"},
+		  {Path,     "path"},
 		  {IsContainer, "isContainer"},
           {HasCover, "hasCover"},
           {Cover,    "cover"}};
@@ -69,8 +71,8 @@ void LibraryModel::updateMediaFiles() {
   endResetModel();
 }
 
-void LibraryModel::setMediaPosition(const QString &uuid, const QString &location) {
-  set_media_position(library_uuid, asRustStr(uuid), asRustStr(location));
+void LibraryModel::setMediaPosition(const QString &uuid, const QString &location, int progress) {
+  set_media_position(library_uuid, asRustStr(uuid), asRustStr(location), progress);
 }
 
 QString LibraryModel::getMediaPosition(const QString &uuid) {

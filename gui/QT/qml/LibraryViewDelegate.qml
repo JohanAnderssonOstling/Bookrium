@@ -66,6 +66,14 @@ Column {
 		}
 	    }
 	}
+	ProgressBar {
+	    id: bookProgress
+	    width: bookCoverContainer.width
+	    height: 5 // Adjust the height as needed
+	    anchors.bottom: bookCoverContainer.bottom
+	    value: progress / 100 // Example value, set this to your actual progress value
+	    visible: !isContainer && progress != 0
+	}
     }
 
     function hoverEnter() {

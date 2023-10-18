@@ -1,4 +1,3 @@
-use std::error::Error;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::*;
@@ -15,7 +14,6 @@ pub struct LibraryModel {
 	pub path: 	String,
 	meta_path: 	String,
 }
-//gljlkjlkj
 impl LibraryModel {
 	pub fn open(uuid: &str, path: &str) -> Self {
 		let meta_path 	= format!("{path}/.bookrium");
@@ -48,10 +46,17 @@ impl LibraryModel {
 		self.db.get_dirs(parent_uuid)
 	}
 
+
 	pub fn scan_lib(&self, path: &str) {
 		let scan_path = PathBuf::from(path);
 		self.db.clear_dirs();
-		self.scan_lib_aux(scan_path, "root");
+		let mut covers: Vec<(String, Vec<u8>)> = Vec::new();
+		covers = self.scan_lib_aux(scan_path, "root", covers);
+		std::thread::spawn(move || {
+			for (path, cover) in covers {
+				create_thumbnails(path, cover);
+			}
+		});
 	}
 
 	pub fn delete_book(&self, book_uuid: &str) -> String{
@@ -60,7 +65,7 @@ impl LibraryModel {
 			Ok(_) => {},
 			Err(err) => {return format!{"Error deleting book: {}", err};}
 		}
-		match std::fs::remove_file(book_path){
+		match fs::remove_file(book_path){
 			Ok(_) => {},
 			Err(err) => {return format!{"Error deleting book: {}", err};}
 		}
@@ -73,7 +78,7 @@ impl LibraryModel {
 			Ok(_) => {},
 			Err(err) => {return format!{"Error deleting dir: {}", err};}
 		}
-		match std::fs::remove_dir_all(&dir_path){
+		match fs::remove_dir_all(&dir_path){
 			Ok(_) => {},
 			Err(err) => {return format!{"Error deleting dir: {}, {}", &dir_path ,err};}
 		}
@@ -81,37 +86,43 @@ impl LibraryModel {
 		"".into()
 	}
 
-	fn scan_lib_aux(&self, scan_path: PathBuf, parent_uuid: &str) {
-		let (dirs, files) = scan_dir(&scan_path);
+	fn scan_lib_aux(&self, scan_path: PathBuf, parent_uuid: &str,
+	mut covers: Vec<(String, Vec<u8>)>) -> Vec<(String, Vec<u8>)>{
 
+		let (dirs, files) = scan_dir(&scan_path);
+		for file in files {
+			let cover = self.scan_book(file, parent_uuid);
+			if cover.is_some() {covers.push(cover.unwrap());}
+		}
 		for dir in dirs {
 			let uuid = Uuid::new_v4().to_string();
 			let name = dir.file_name().unwrap().to_str().unwrap();
 			self.db.insert_dir(uuid.as_str(), name, parent_uuid);
-			self.scan_lib_aux(dir, uuid.as_str());
-		}
+			//Start scan in new thread
 
-		for file in files { self.scan_book(file, parent_uuid); }
+			covers = self.scan_lib_aux(dir, uuid.as_str(), covers);
+		}
+		covers
 	}
 
-	fn scan_book(&self, file: PathBuf, parent_uuid: &str) {
+	fn scan_book(&self, file: PathBuf, parent_uuid: &str) -> Option<(String, Vec<u8>)>{
 		let file_name 		= file.file_name().unwrap().to_str().unwrap();
 		let existing_uuid 	= self.db.get_book_uuid(file_name);
 
 		if 	let Some(uuid) = existing_uuid {
 			self.db.insert_book_dir(&uuid, parent_uuid);
-			return;
+			return None;
 		}
 
 		if 	let Some(uuid) = get_uuid(file.as_path()) {
 			if 	self.db.book_exists(&uuid) {
 				self.db.insert_book_dir(&uuid, parent_uuid);
-				return;
+				return None;
 			}
 		}
 
 		let book_res = parse_book(&file, parent_uuid);
-		if  book_res.is_none() { return; }
+		book_res.as_ref()?;
 		let (book, cover_option) = book_res.unwrap();
 		let scan_time = SystemTime::now().duration_since(
 			UNIX_EPOCH).unwrap().as_secs();
@@ -119,16 +130,17 @@ impl LibraryModel {
 		self.db.insert_book(book, scan_time);
 		self.db.insert_book_dir(book_uuid.as_str(), parent_uuid);
 
-		if  let Some(cover) = cover_option { ;
+		if  let Some(cover) = cover_option {
 			let out_path = format!("{}/{}", self.meta_path, book_uuid);
-			create_thumbnails(out_path, cover);
+			return Some((out_path, cover));
 		}
+		None
 	}
 }
 
 impl LibraryModel {
-	pub fn set_pos(&self, uuid: &str, position: &str) {
-		self.db.set_pos(uuid, position);
+	pub fn set_pos(&self, uuid: &str, position: &str, progress: u8) {
+		self.db.set_pos(uuid, position, progress);
 	}
 
 	pub fn get_pos(&self, uuid: &str) -> String {
@@ -146,7 +158,7 @@ impl LibraryModel {
 		let books = self.get_books(container_uuid);
 		for book in books {
 			let cover_path = self.get_cover_path(book.uuid.as_str());
-			if cover_path.len() > 0 {return cover_path;}
+			if !cover_path.is_empty() {return cover_path;}
 		}
 		"".into()
 	}

@@ -23,12 +23,20 @@ pub fn get_libraries() -> Vec<Library> {
 }
 
 pub fn delete_library(uuid: &str) {
-    //self.conn.delete_library(uuid).await.unwrap();
-    todo!()
+    //Delete csv entry matching uuid
+    let mut reader = Reader::from_path(CSV_PATH).unwrap();
+    let mut writer = WriterBuilder::new()
+        .has_headers(true)
+        .from_writer(OpenOptions::new().create(true).truncate(true)
+                                      .write(true).open(CSV_PATH).unwrap());
+    writer.serialize(("uuid", "path")).unwrap();
+    for result in reader.records() {
+        let record = result.unwrap().as_slice().to_string();
+        if record != uuid {
+            writer.serialize(record).unwrap();
+        }
+    }
+    writer.flush().unwrap();
 }
 
-pub fn get_library(uuid: &str) -> Library {
-    //self.conn.select_library(uuid).await.unwrap()
-    todo!()
-}
 

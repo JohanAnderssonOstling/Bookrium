@@ -44,8 +44,8 @@ void HomeModel::updateLibraries() {
     endResetModel();
 }
 
-void HomeModel::deleteLibrary(int row) {
-    delete_library(this->libraries.at(row).uuid);
+void HomeModel::deleteLibrary(const QString &uuid) {
+    delete_library(asRustStr(uuid));
     updateLibraries();
 }
 

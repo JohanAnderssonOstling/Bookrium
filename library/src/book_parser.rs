@@ -1,7 +1,5 @@
 use std::path::Path;
 
-use rbook::Ebook;
-
 use library_types::*;
 use pdf_parser::*;
 use epub_parser::*;
@@ -20,6 +18,7 @@ pub fn parse_book (path: &Path, parent_uuid: &str) -> Option<(ParseBook, Cover)>
 
 pub fn get_uuid (path: &Path) -> Option<String> {
   let path_str = path.to_str().unwrap();
+  println!("get_uuid: {}", path_str);
   match path.extension().unwrap().to_str().unwrap() {
     //"pdf"  	=> 	get_pdf_uuid(path),
     "epub" => get_epub_uuid(path),

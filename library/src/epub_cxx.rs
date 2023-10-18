@@ -37,8 +37,7 @@ fn get_epub<F: FnOnce(&mut Epub)>(uuid: &str, f: F) {
 }
 
 fn open_epub (path: &str) -> String {
-    let path = path.to_string();
-    path.replace("\\\"", "\\");
+    let path = path.to_string().replace("\\\"", "\\");
     let epub = Epub::new(path.as_str());
     let uuid = uuid::Uuid::new_v4().to_string();
     EPUBS.lock().unwrap().insert(uuid.clone(), epub);

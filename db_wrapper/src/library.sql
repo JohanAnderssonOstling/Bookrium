@@ -95,7 +95,8 @@ VALUES 			(:book_uuid,:dir_uuid);
 -- # Parameters
 -- param: uuid: &str
 -- param: position: &str
-UPDATE book SET position = :position WHERE uuid = :uuid;
+-- param: progress: u8
+UPDATE book SET position = :position, progress = :progress WHERE uuid = :uuid;
 
 --name: get_pos?
 -- # Parameters
