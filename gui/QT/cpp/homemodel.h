@@ -18,6 +18,7 @@ public:
 	UuidRole = Qt::UserRole,
 	NameRole,
 	PathRole,
+	CoversRole,
     };
 
     HomeModel(QObject* parent = nullptr);

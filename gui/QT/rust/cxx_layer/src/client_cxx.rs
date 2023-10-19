@@ -18,6 +18,10 @@ fn get_libraries() -> Vec<Library>{
     cxx_libraries
 }
 
+fn get_covers(library_path: &str) -> Vec<String> {
+    model::get_covers(library_path)
+}
+
 fn delete_library(uuid: &str){
     model::delete_library(uuid)
 }
@@ -35,6 +39,7 @@ mod ffi {
     extern "Rust" {
         fn create_library(name: &str, path: &str, url: &str) -> Library;
         fn get_libraries() -> Vec<Library>;
+        fn get_covers(library_path: &str) -> Vec<String>;
         fn delete_library(uuid: &str);
         fn start_db();
     }

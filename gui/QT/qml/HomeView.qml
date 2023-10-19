@@ -26,8 +26,8 @@ ColumnLayout {
 	id: homeGrid
 	Layout.fillWidth: true
 	Layout.fillHeight: true
-	cellWidth: 260
-	cellHeight: 330
+	cellWidth: 400
+	cellHeight: 500
 	clip: true
 
 	model: HomeModel

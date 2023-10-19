@@ -14,8 +14,8 @@ Column{
     }
     Rectangle{
 	anchors.horizontalCenter: parent.horizontalCenter
-	width: 200
-	height: 300
+	width: 300
+	height: 450
 	color: "lightblue"
 	MouseArea{
 	    anchors.fill: parent
@@ -27,6 +27,25 @@ Column{
 		else if(mouse.button & Qt.RightButton){
 		    homeContextMenu.popup()
 		}}
+	}
+
+	GridLayout {
+	    columns: 2
+	    anchors.centerIn: parent
+	    Image {
+		source: "file://" + covers[0]
+	    }
+	    Image {
+		source: "file://" + covers[1]
+	    }
+	    Image {
+		source: "file://" + covers[2]
+
+	    }
+	    Image {
+		source: "file://" + covers[3]
+
+	    }
 	}
     }
     Label{

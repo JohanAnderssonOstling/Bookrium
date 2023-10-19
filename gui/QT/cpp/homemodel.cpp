@@ -11,9 +11,20 @@ HomeModel::HomeModel(QObject* parent) : QAbstractListModel {parent}
     updateLibraries();
 }
 
+QVector<QString> getCovers(const QString& path) {
+	rust::Vec<rust::String> rust_covers = get_covers(asRustStr(path));
+	QVector<QString> covers;
+	for (int i = 0; i < 4; i++) {
+		qInfo() << asQStr(rust_covers.at(i)) << Qt::endl;
+		covers.append(asQStr(rust_covers.at(i)));
+	}
+	return covers;
+}
+
 //Model methods
 QHash<int, QByteArray> HomeModel::roleNames() const {
-    return { {UuidRole, "uuid"}, {NameRole, "name"}, {PathRole, "path"} };
+    return { {UuidRole, "uuid"}, {NameRole, "name"}, {PathRole, "path"},
+			 {CoversRole, "covers"}};
 }
 
 QVariant HomeModel::data(const QModelIndex &index, int role) const {
@@ -22,6 +33,15 @@ QVariant HomeModel::data(const QModelIndex &index, int role) const {
         case UuidRole: return asQStr(library.uuid);
         case NameRole: return asQStr(library.name);
         case PathRole: return asQStr(library.path);
+		case CoversRole: {
+			rust::Vec<rust::String> rust_covers = get_covers(library.path);
+			QVector<QString> covers;
+			for (int i = 0; i < 4; i++) {
+				qInfo() << asQStr(rust_covers.at(0)) << Qt::endl;
+				covers.append(asQStr(rust_covers.at(i)));
+			}
+			return covers;
+		}
         default: return {};
     }
 }
@@ -52,3 +72,5 @@ void HomeModel::deleteLibrary(const QString &uuid) {
 void HomeModel::openLibrary(int row) {
 
 }
+
+
