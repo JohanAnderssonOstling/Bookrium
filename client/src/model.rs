@@ -26,8 +26,6 @@ pub fn get_libraries() -> Vec<Library> {
 }
 
 pub fn get_covers(path: &str) -> Vec<String> {
-    //Get all folders in path
-    println!("{path}/.bookrium");;
     let library_path = PathBuf::from(format!("{path}/.bookrium"));
     let mut covers: Vec<String> = vec!["".to_string(); 4];
     let mut cover_count = 0;
@@ -36,10 +34,8 @@ pub fn get_covers(path: &str) -> Vec<String> {
             if let Ok(dir) = entry {
                 if (dir.path().is_dir()) {
                     if let Some(cover) = get_cover(dir.path()) {
-                        println!("Pushing {cover}");
                         covers[cover_count] = cover;
                         cover_count += 1;
-
                         if cover_count == 4 { break; }
                     }
                 }
@@ -47,7 +43,6 @@ pub fn get_covers(path: &str) -> Vec<String> {
 
         }
     }
-    println!("Returning covers");
     covers
 }
 
@@ -61,15 +56,17 @@ pub fn get_cover(mut path: PathBuf) -> Option<String> {
 pub fn delete_library(uuid: &str) {
     //Delete csv entry matching uuid
     let mut reader = Reader::from_path(CSV_PATH).unwrap();
+    let libraries: Vec<Library> = reader.deserialize().map(|result| result.unwrap()).collect();
+
     let mut writer = WriterBuilder::new()
         .has_headers(true)
         .from_writer(OpenOptions::new().create(true).truncate(true)
-                                      .write(true).open(CSV_PATH).unwrap());
+                                       .write(true).open(CSV_PATH).unwrap());
     writer.serialize(("uuid", "path")).unwrap();
-    for result in reader.records() {
-        let record = result.unwrap().as_slice().to_string();
-        if record != uuid {
-            writer.serialize(record).unwrap();
+    for library in libraries {
+        if library.uuid != uuid{
+            writer.serialize(&library).unwrap();
+
         }
     }
     writer.flush().unwrap();

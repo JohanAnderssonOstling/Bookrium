@@ -14,10 +14,7 @@ HomeModel::HomeModel(QObject* parent) : QAbstractListModel {parent}
 QVector<QString> getCovers(const QString& path) {
 	rust::Vec<rust::String> rust_covers = get_covers(asRustStr(path));
 	QVector<QString> covers;
-	for (int i = 0; i < 4; i++) {
-		qInfo() << asQStr(rust_covers.at(i)) << Qt::endl;
-		covers.append(asQStr(rust_covers.at(i)));
-	}
+	for (int i = 0; i < 4; i++) covers.append(asQStr(rust_covers.at(i)));
 	return covers;
 }
 
@@ -33,15 +30,8 @@ QVariant HomeModel::data(const QModelIndex &index, int role) const {
         case UuidRole: return asQStr(library.uuid);
         case NameRole: return asQStr(library.name);
         case PathRole: return asQStr(library.path);
-		case CoversRole: {
-			rust::Vec<rust::String> rust_covers = get_covers(library.path);
-			QVector<QString> covers;
-			for (int i = 0; i < 4; i++) {
-				qInfo() << asQStr(rust_covers.at(0)) << Qt::endl;
-				covers.append(asQStr(rust_covers.at(i)));
-			}
-			return covers;
-		}
+		case CoversRole: return getCovers(asQStr(library.path));
+
         default: return {};
     }
 }
