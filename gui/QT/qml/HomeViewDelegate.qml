@@ -14,8 +14,8 @@ Column{
     }
     Rectangle{
 	anchors.horizontalCenter: parent.horizontalCenter
-	width: 300
-	height: 450
+	width: 256 * 2
+	height: 400
 	color: "lightblue"
 	MouseArea{
 	    anchors.fill: parent
@@ -26,25 +26,19 @@ Column{
 		}
 		else if(mouse.button & Qt.RightButton){
 		    homeContextMenu.popup()
-		}}
-	}
-
-	GridLayout {
-	    columns: 2
-	    anchors.centerIn: parent
-	    Image {
-		source: "file://" + covers[0]
+		}
 	    }
-	    Image {
-		source: "file://" + covers[1]
-	    }
-	    Image {
-		source: "file://" + covers[2]
-
-	    }
-	    Image {
-		source: "file://" + covers[3]
-
+	    Row {
+		spacing: 0
+		anchors.bottom: parent.bottom
+		Image {
+		    source: "file://" + covers[0]
+		    anchors.bottom: parent.bottom
+		}
+		Image {
+		    source: "file://" + covers[1]
+		    anchors.bottom: parent.bottom
+		}
 	    }
 	}
     }

@@ -1,11 +1,7 @@
 use ffi::Library;
 use client::*;
 
-fn start_db(){}
-
-
-
-fn create_library(name: &str, path: &str, url: &str) -> Library{
+fn create_library(path: &str) -> Library{
     convert_library(model::create_library(path))
 }
 
@@ -18,8 +14,8 @@ fn get_libraries() -> Vec<Library>{
     cxx_libraries
 }
 
-fn get_covers(library_path: &str) -> Vec<String> {
-    model::get_covers(library_path)
+fn get_covers(library_path: &str, cover_scale: u32) -> Vec<String> {
+    model::get_covers(library_path, cover_scale)
 }
 
 fn delete_library(uuid: &str){
@@ -37,11 +33,10 @@ fn convert_library(lib: library_types::home_types::Library) -> Library {
 #[cxx::bridge]
 mod ffi {
     extern "Rust" {
-        fn create_library(name: &str, path: &str, url: &str) -> Library;
+        fn create_library(path: &str) -> Library;
         fn get_libraries() -> Vec<Library>;
-        fn get_covers(library_path: &str) -> Vec<String>;
+        fn get_covers(library_path: &str, cover_scale: u32) -> Vec<String>;
         fn delete_library(uuid: &str);
-        fn start_db();
     }
 
     pub struct Library {pub uuid: String, pub name: String, pub path: String}

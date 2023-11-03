@@ -1,3 +1,4 @@
+use std::fmt::format;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::*;
@@ -65,9 +66,16 @@ impl LibraryModel {
 			Ok(_) => {},
 			Err(err) => {return format!{"Error deleting book: {}", err};}
 		}
+		println!("book: {book_path}");
 		match fs::remove_file(book_path){
 			Ok(_) => {},
 			Err(err) => {return format!{"Error deleting book: {}", err};}
+		}
+		let cover_path = format!("{}/.bookrium/{}", self.path, book_uuid);
+		println!("Cover path: {cover_path}");
+		match fs::remove_dir_all(cover_path){
+			Ok(_) => {},
+			Err(err) => {return format!{"Error deleting book covers{}", err};}
 		}
 		"".into()
 	}

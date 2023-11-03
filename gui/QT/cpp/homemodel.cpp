@@ -7,14 +7,13 @@
 
 HomeModel::HomeModel(QObject* parent) : QAbstractListModel {parent}
 {
-    start_db();
     updateLibraries();
 }
 
 QVector<QString> getCovers(const QString& path) {
-	rust::Vec<rust::String> rust_covers = get_covers(asRustStr(path));
+	rust::Vec<rust::String> rust_covers = get_covers(asRustStr(path), 2);
 	QVector<QString> covers;
-	for (int i = 0; i < 4; i++) covers.append(asQStr(rust_covers.at(i)));
+	for (int i = 0; i < 2; i++) covers.append(asQStr(rust_covers.at(i)));
 	return covers;
 }
 
@@ -27,11 +26,10 @@ QHash<int, QByteArray> HomeModel::roleNames() const {
 QVariant HomeModel::data(const QModelIndex &index, int role) const {
     Library library = this->libraries.at(index.row());
     switch (role){
-        case UuidRole: return asQStr(library.uuid);
-        case NameRole: return asQStr(library.name);
-        case PathRole: return asQStr(library.path);
-		case CoversRole: return getCovers(asQStr(library.path));
-
+        case UuidRole: 		return asQStr(library.uuid);
+        case NameRole: 		return asQStr(library.name);
+        case PathRole: 		return asQStr(library.path);
+		case CoversRole: 	return getCovers(asQStr(library.path));
         default: return {};
     }
 }
@@ -43,8 +41,7 @@ int HomeModel::rowCount(const QModelIndex &parent) const {
 //Signals
 void HomeModel::createLibrary(QString path){
     path = path.replace("file://", "");
-    rust::String name = path.split("/").last().toUtf8().constData();
-    create_library(name, path.toStdString(), "localhost:8080");
+    create_library(path.toStdString());
     updateLibraries();
 }
 

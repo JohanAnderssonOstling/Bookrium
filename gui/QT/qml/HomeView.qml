@@ -26,12 +26,12 @@ ColumnLayout {
 	id: homeGrid
 	Layout.fillWidth: true
 	Layout.fillHeight: true
-	cellWidth: 400
-	cellHeight: 500
+	cellWidth: 256 * 2 + 50
+	cellHeight: 256 * 1.6 + 100
 	clip: true
 
 	model: HomeModel
-	highlight: Rectangle { color: "lightblue" }
+	highlight: Rectangle { color: "black" }
 	delegate:
 	    HomeViewDelegate{}
 

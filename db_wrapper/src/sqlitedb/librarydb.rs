@@ -31,6 +31,7 @@ impl LibraryDBConn {
 
 	pub fn clear_dirs(&self) {
 		self.db.execute("DELETE FROM dir", []).unwrap();
+		self.db.execute("DELETE FROM book_dir", []).unwrap();
 		self.insert_dir("root", "None", "/");
 	}
 
@@ -158,7 +159,7 @@ impl LibraryDBConn {
 			dir_path 	= self.get_dir_path(dir_uuid.as_str());
 			Ok(())
 		}).expect("Error getting book file name");
-		format!("{}/{}/{}", library_path, dir_path, book_file_name).replace("/None", "")
+		format!("{}/{}/{}", library_path, dir_path, book_file_name).replace("/None", "").replace("//", "/")
 	}
 
 	pub fn book_exists(&self, uuid: &str) -> bool {
