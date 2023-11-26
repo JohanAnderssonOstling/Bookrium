@@ -1,4 +1,4 @@
-use std::fmt::format;
+use std::fmt::{Error, format};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::*;
@@ -19,8 +19,8 @@ impl LibraryModel {
 	pub fn open(uuid: &str, path: &str) -> Self {
 		let meta_path 	= format!("{path}/.bookrium");
 		match fs::create_dir_all(&meta_path) {
-			Ok(_) => {},
-			Err(err) => {println!("Error creating meta dir: {}", err)},
+			Ok(_) 		=> {},
+			Err(err) 	=> {println!("Error creating meta dir: {}", err)},
 		}
 		let db_path		= format!("{meta_path}/library.db");
 		Self {
@@ -31,71 +31,37 @@ impl LibraryModel {
 		}
 	}
 
-	pub fn get_books(&self, folder_uuid: &str) -> Books {
-		self.db.get_books(folder_uuid)
+	pub fn get_books(&self, folder_uuid: &str) 	-> Books 	{ self.db.get_books(folder_uuid) }
+	pub fn get_book_path(&self, book_uuid: &str)-> String 	{ self.db.get_book_path(book_uuid, &self.path) }
+	pub fn get_book_toc(&self, book_uuid: &str) -> Contents { self.db.get_book_toc(book_uuid) }
+	pub fn get_dirs(&self, parent_uuid: &str) 	-> Dirs 	{ self.db.get_dirs(parent_uuid) }
+
+	pub fn delete_book(&self, book_uuid: &str) -> Result<(), std::io::Error> {
+		let book_path = self.get_book_path(book_uuid);
+		self.db.delete_book(book_uuid).unwrap();
+		fs::remove_file(book_path)?;
+		fs::remove_dir_all(format!("{}/.bookrium/{}", self.path, book_uuid))?;
+		Ok(())
 	}
 
-	pub fn get_book_path(&self, book_uuid: &str) -> String {
-		self.db.get_book_path(book_uuid, &self.path)
+	pub fn delete_dir(&self, dir_uuid: &str) -> Result<(), std::io::Error> {
+		let dir_path = self.db.get_dir_path(dir_uuid);
+		self.db.delete_dir(dir_uuid).unwrap();
+		fs::remove_dir_all(dir_path)?;
+		Ok(())
 	}
-
-	pub fn get_book_toc(&self, book_uuid: &str) -> Contents {
-		self.db.get_book_toc(book_uuid)
-	}
-
-	pub fn get_dirs(&self, parent_uuid: &str) -> Dirs {
-		self.db.get_dirs(parent_uuid)
-	}
-
 
 	pub fn scan_lib(&self, path: &str) {
-		let scan_path = PathBuf::from(path);
 		self.db.clear_dirs();
 		let mut covers: Vec<(String, Vec<u8>)> = Vec::new();
-		covers = self.scan_lib_aux(scan_path, "root", covers);
+		covers = self.scan_lib_aux(PathBuf::from(path), "root", covers);
 		std::thread::spawn(move || {
-			for (path, cover) in covers {
-				create_thumbnails(path, cover);
-			}
+			for (path, cover) in covers { create_thumbnails(path, cover); }
 		});
 	}
 
-	pub fn delete_book(&self, book_uuid: &str) -> String{
-		let book_path = self.get_book_path(book_uuid);
-		match self.db.delete_book(book_uuid){
-			Ok(_) => {},
-			Err(err) => {return format!{"Error deleting book: {}", err};}
-		}
-		println!("book: {book_path}");
-		match fs::remove_file(book_path){
-			Ok(_) => {},
-			Err(err) => {return format!{"Error deleting book: {}", err};}
-		}
-		let cover_path = format!("{}/.bookrium/{}", self.path, book_uuid);
-		println!("Cover path: {cover_path}");
-		match fs::remove_dir_all(cover_path){
-			Ok(_) => {},
-			Err(err) => {return format!{"Error deleting book covers{}", err};}
-		}
-		"".into()
-	}
-
-	pub fn delete_dir(&self, dir_uuid: &str) -> String{
-		let dir_path = self.db.get_dir_path(dir_uuid);
-		match self.db.delete_dir(dir_uuid){
-			Ok(_) => {},
-			Err(err) => {return format!{"Error deleting dir: {}", err};}
-		}
-		match fs::remove_dir_all(&dir_path){
-			Ok(_) => {},
-			Err(err) => {return format!{"Error deleting dir: {}, {}", &dir_path ,err};}
-		}
-
-		"".into()
-	}
-
-	fn scan_lib_aux(&self, scan_path: PathBuf, parent_uuid: &str,
-	mut covers: Vec<(String, Vec<u8>)>) -> Vec<(String, Vec<u8>)>{
+	fn scan_lib_aux(&self, scan_path: PathBuf, parent_uuid: &str, mut covers: Vec<(String, Vec<u8>)>)
+		-> Vec<(String, Vec<u8>)>{
 
 		let (dirs, files) = scan_dir(&scan_path);
 		for file in files {
@@ -106,8 +72,6 @@ impl LibraryModel {
 			let uuid = Uuid::new_v4().to_string();
 			let name = dir.file_name().unwrap().to_str().unwrap();
 			self.db.insert_dir(uuid.as_str(), name, parent_uuid);
-			//Start scan in new thread
-
 			covers = self.scan_lib_aux(dir, uuid.as_str(), covers);
 		}
 		covers
@@ -117,25 +81,16 @@ impl LibraryModel {
 		let file_name 		= file.file_name().unwrap().to_str().unwrap();
 		let existing_uuid 	= self.db.get_book_uuid(file_name);
 
-		if 	let Some(uuid) = existing_uuid {
-			self.db.insert_book_dir(&uuid, parent_uuid);
-			return None;
-		}
-
-		if 	let Some(uuid) = get_uuid(file.as_path()) {
-			if 	self.db.book_exists(&uuid) {
+		if let Some(uuid) = existing_uuid.or_else(|| get_uuid(file.as_path())) {
+			if self.db.book_exists(&uuid) {
 				self.db.insert_book_dir(&uuid, parent_uuid);
 				return None;
 			}
 		}
 
-		let book_res = parse_book(&file, parent_uuid);
-		book_res.as_ref()?;
-		let (book, cover_option) = book_res.unwrap();
-		let scan_time = SystemTime::now().duration_since(
-			UNIX_EPOCH).unwrap().as_secs();
+		let (book, cover_option) = parse_book(&file, parent_uuid).unwrap();
 		let book_uuid = book.book.uuid.clone();
-		self.db.insert_book(book, scan_time);
+		self.db.insert_book(book);
 		self.db.insert_book_dir(book_uuid.as_str(), parent_uuid);
 
 		if  let Some(cover) = cover_option {

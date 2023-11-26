@@ -25,7 +25,6 @@ create table if not exists creator(
 create table if not exists book_creator(
   book_uuid    TEXT,
   container_uuid TEXT
-
 );
 
 -- name: create_dir_table!

@@ -1,9 +1,14 @@
+use std::fmt::format;
+use std::time::{SystemTime, UNIX_EPOCH};
 use library_types::*;
 use include_sqlite_sql::{include_sql, impl_sql};
 use rusqlite::*;
 use serde_json::*;
 include_sql!("src/library.sql");
 include_sql!("src/create_library.sql");
+
+static table_names: [&str; 3] = ["creator", "subject", "publisher"];
+
 pub struct LibraryDBConn {
 	pub db: rusqlite::Connection,
 }
@@ -22,33 +27,32 @@ impl LibraryDBConn {
 
 	pub fn get_dirs(&self, parent_dir_uuid: &str) -> Dirs {
 		let mut dirs: Vec<Dir> = Vec::new();
-		self.db.get_dirs(parent_dir_uuid, |row| {
-			dirs.push(deserialize_dir(row).unwrap());
+		self.db.get_dirs (parent_dir_uuid, |row| {
+			dirs.push (deserialize_dir(row).unwrap());
 			Ok(())
-		}).expect("Error getting folders");
+		}).expect ("Error getting folders");
 		dirs
 	}
 
 	pub fn clear_dirs(&self) {
-		self.db.execute("DELETE FROM dir", []).unwrap();
-		self.db.execute("DELETE FROM book_dir", []).unwrap();
-		self.insert_dir("root", "None", "/");
+		self.db.execute ("DELETE FROM dir", []).unwrap();
+		self.db.execute ("DELETE FROM book_dir", []).unwrap();
+		self.insert_dir ("root", "None", "/");
 	}
 
 	pub fn get_dir_path(&self, dir_uuid: &str) -> String {
 		let mut path: String = String::new();
 		self.db.select_dir(dir_uuid, |row| {
-			let name: String = row.get(2).unwrap();
-			let parent_uuid: String = row.get(1).unwrap();
+			let dir_name: 	String = row.get(2).unwrap();
+			let parent_uuid:String = row.get(1).unwrap();
 
 			if parent_uuid.eq("root") {
-				path = format!("{}/", name);
+				path = format!("{}/", dir_name);
 				return Ok(());
 			};
-			println!("get_dir_path: {} {}", parent_uuid, name);
 
 			let dir_path = self.get_dir_path(parent_uuid.as_str());
-			path = format!("{}/{}", dir_path, name);
+			path = format!("{}/{}", dir_path, dir_name);
 			Ok(())
 		}).expect("Error getting media position");
 		path.replace("//", "/")
@@ -70,7 +74,8 @@ impl LibraryDBConn {
 		uuid
 	}
 
-	pub fn insert_book(&self, parsed_book: ParseBook, scan_timestamp: u64) {
+	pub fn insert_book(&self, parsed_book: ParseBook) {
+		let scan_time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
 		let book_uuid = parsed_book.book.uuid.as_str();
 		self.db.insert_book(
 			book_uuid,
@@ -82,7 +87,7 @@ impl LibraryDBConn {
 			parsed_book.mdata.desc.as_str(),
 			to_string(&parsed_book.mdata.ids).unwrap().as_str(),
 			parsed_book.mdata.publ.clone(),
-			scan_timestamp,
+			scan_time,
 		).unwrap();
 		self.insert_containers("creator", book_uuid, parsed_book.authors);
 		self.insert_containers("subject", book_uuid, parsed_book.subjects);
@@ -108,37 +113,32 @@ impl LibraryDBConn {
 		}
 	}
 
-	fn get_entry_uuid(&self, table_name: &str, entry_name: &str)
-		-> Option<String>{
-		let query = format!("SELECT uuid FROM {table_name} WHERE name = ?");
-		let mut stmt = self.db.prepare(query.as_str()).unwrap();
+	fn get_entry_uuid(&self, table_name: &str, entry_name: &str) -> Option<String>{
+		let query		= format!("SELECT uuid FROM {table_name} WHERE name = ?");
+		let mut stmt 	= self.db.prepare(query.as_str()).unwrap();
 		match stmt.query_row(params![entry_name], |row| row.get(0)) {
 			Ok(val) => Some(val),
-			Err(rusqlite::Error::QueryReturnedNoRows) => None, // No matching row
-			Err(e) => None, // Some other error
+			Err(e) 	=> None, // Some other error
 		}
 	}
 
-	fn insert_container(&self, table_name: &str, name: &str)
-	-> String {
-		let query = format!
-		("INSERT INTO {table_name} (uuid, name) VALUES (?,?)");
-		let uuid = uuid::Uuid::new_v4().to_string();
-		let mut stmt = self.db.prepare(query.as_str()).unwrap();
+	fn insert_container(&self, table_name: &str, name: &str) -> String {
+		let query 		= format!("INSERT INTO {table_name} (uuid, name) VALUES (?,?)");
+		let uuid 		= uuid::Uuid::new_v4().to_string();
+		let mut stmt 	= self.db.prepare(query.as_str()).unwrap();
 		stmt.execute(params![uuid, name]).unwrap();
 		uuid
 	}
 
 	fn insert_book_container(&self, table_name: &str, book_uuid: &str, container_uuid: &str ){
-		let query = format!("INSERT INTO book_{table_name} \
-			(book_uuid, container_uuid) VALUES (?,?)");
-		let mut stmt = self.db.prepare(query.as_str()).unwrap();
-		println!("{table_name} {book_uuid} {container_uuid}");
+		let query		= format!("INSERT INTO book_{table_name} (book_uuid, container_uuid) VALUES (?,?)");
+		let mut stmt 	= self.db.prepare(query.as_str()).unwrap();
 		match stmt.execute(params![book_uuid, container_uuid]) {
-			Ok(_) => (),
-			Err(_) => ()
+			Ok(_) 	=> (),
+			Err(_) 	=> ()
 		}
 	}
+
 
 	pub fn get_books(&self, dir_uuid: &str) -> Books {
 		let mut books: Books = Vec::new();
@@ -151,15 +151,17 @@ impl LibraryDBConn {
 	}
 
 	pub fn get_book_path(&self, uuid: &str, library_path: &String) -> String {
-		let mut book_file_name: String = String::new();
-		let mut dir_path: String = String::new();
+		let mut file_name: 	String = String::new();
+		let mut dir_path: 	String = String::new();
+
 		self.db.get_book_file_info(uuid, |row| {
-			book_file_name 			= row.get(0).unwrap();
+			file_name 				= row.get(0).unwrap();
 			let dir_uuid: String 	= row.get(1).unwrap();
-			dir_path 	= self.get_dir_path(dir_uuid.as_str());
+			dir_path 				= self.get_dir_path(dir_uuid.as_str());
 			Ok(())
 		}).expect("Error getting book file name");
-		format!("{}/{}/{}", library_path, dir_path, book_file_name).replace("/None", "").replace("//", "/")
+
+		format!("{}/{}/{}", library_path, dir_path, file_name).replace("/None", "").replace("//", "/")
 	}
 
 	pub fn book_exists(&self, uuid: &str) -> bool {
@@ -170,7 +172,6 @@ impl LibraryDBConn {
 		}).expect("Error getting media position");
 		exists
 	}
-
 
 	pub fn set_pos(&self, uuid: &str, pos: &str, progress: u8) {
 		self.db.set_pos(uuid, pos, progress).unwrap();
@@ -192,26 +193,33 @@ impl LibraryDBConn {
 		}).expect("Error getting toc");
 		contents
 	}
-
 }
 
 // Deserialize functions ---------------------------------------
 
 fn deserialize_dir(row: &Row) -> rusqlite::Result<Dir> {
-	Ok(Dir { uuid: row.get(0)?, name: row.get(1)?, parent: row.get(2)? })
+	Ok(Dir {uuid: row.get(0)?, name: row.get(1)?, parent: row.get(2)? })
 }
 
 fn deserialize_book(row: &Row) -> rusqlite::Result<LibBook> {
-	Ok(LibBook {
-		uuid: row.get(0).unwrap(),
-		title: row.get(1).unwrap(),
-		progress: row.get(2).unwrap(),
-	})
+	Ok(LibBook {uuid: row.get(0).unwrap(), title: row.get(1).unwrap(), progress: row.get(2).unwrap(), })
 }
 
 fn deserialize_toc(row: &Row) -> Contents {
 	let json: String = row.get(0).unwrap();
 	from_str(json.as_str()).unwrap()
+}
+
+fn create_book_container_schema (db: Connection, container_name: &str) -> Connection {
+	let query = format!{
+		"create table if not exists book_{container_name}\
+		book_uuid		TEXT,\
+		container_uuid	TEXT,\
+		PRIMARY KEY (book_uuid, container_uuid),\
+		FOREIGN KEY (book_uuid) REFERENCES books (book_uuid) ON DELETE CASCADE,\
+		FOREIGN KEY (container_uuid) REFERENCES {container_name} (uuid) ON DELETE CASCADE);"};
+	db.execute(query.as_str(), params![]).unwrap();
+	db
 }
 
 fn create_schema (db: Connection) -> Connection{

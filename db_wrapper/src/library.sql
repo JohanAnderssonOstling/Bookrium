@@ -74,11 +74,6 @@ DELETE FROM dir WHERE dir_uuid = :dir_uuid;
 SELECT dir_uuid, dir_name, parent_uuid
 FROM dir WHERE parent_uuid = :dir_uuid;
 
--- name: clear_dirs!
--- # Parameters
--- param: test
-DELETE FROM dir;
-
 -- name: select_dir?
 -- # Parameters
 -- param: dir_uuid: &str

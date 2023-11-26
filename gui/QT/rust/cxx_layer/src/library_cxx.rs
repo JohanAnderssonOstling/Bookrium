@@ -74,7 +74,10 @@ fn get_book_toc(library_uuid: &str, book_uuid: &str) -> Vec<Nav>{
 fn delete_book(library_uuid: &str, book_uuid: &str) -> String {
 	let mut library_lock = LIBRARIES.lock().unwrap();
 	let library = library_lock.get_mut(library_uuid).unwrap();
-	library.delete_book(book_uuid)
+	match library.delete_book(book_uuid) {
+		Ok(_) => {},
+		Err(err) => {return format!{"Error deleting book: {}", err};}
+	}
 }
 
 fn delete_dir(library_uuid: &str, dir_uuid: &str) -> String {
@@ -89,12 +92,8 @@ mod library_ffi {
 	pub uuid: String, pub title: String, pub progress: u8, pub cover_path: String,
     }
 
-    pub struct Dir {
-	pub uuid: String, pub name: String, pub cover_path: String,
-    }
-	pub struct Nav {
-		pub name: String, pub href: String,
-	}
+    pub struct Dir { pub uuid: String, pub name: String, pub cover_path: String, }
+	pub struct Nav { pub name: String, pub href: String, }
 
     extern "Rust" {
 	fn get_media_files(uuid: &str, folder_uuid: &str) -> Vec<CXXBook>;
