@@ -10,9 +10,8 @@ pub struct Library {
 impl Library {
 	pub fn new(path: &str) -> Self {
 		Self {
-				uuid: Uuid::new_v4().to_string(),
-		    	path: path.to_string(),
-
+			uuid: Uuid::new_v4().to_string(),
+			path: path.to_string(),
 		}
 	}
 }

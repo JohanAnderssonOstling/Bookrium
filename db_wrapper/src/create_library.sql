@@ -2,7 +2,7 @@
 
 create table if not exists book(
   uuid		TEXT primary key,
-  file_name     TEXT    not null,
+  name     TEXT    not null,
   progress      INTEGER not null,
   position      TEXT,
   navigation    TEXT,
@@ -14,66 +14,60 @@ create table if not exists book(
   library_add_timestamp INTEGER
 );
 
--- name: create_creator_table!
-create table if not exists creator(
-  uuid        TEXT primary key,
-  name        TEXT not null,
-  description TEXT
-);
-
--- name: create_book_creator_table!
-create table if not exists book_creator(
-  book_uuid    TEXT,
-  container_uuid TEXT
+create table if not exists book_link(
+  linker_uuid	TEXT,
+  linkee_uuid	TEXT,
+  PRIMARY KEY (linker_uuid, linkee_uuid),
+  FOREIGN KEY (linker_uuid) REFERENCES book (uuid) ON DELETE CASCADE,
+  FOREIGN KEY (linkee_uuid) REFERENCES book (uuid) ON DELETE CASCADE
 );
 
 -- name: create_dir_table!
 create table if not exists dir (
-  dir_uuid    TEXT primary key,
-  parent_uuid TEXT,
-  dir_name    TEXT not null
+  uuid    		TEXT primary key,
+  parent_uuid 	TEXT,
+  name    		TEXT not null
 );
 
 -- name: create_book_dir_table!
-create table if not exists book_dir (
-  book_uuid TEXT,
-  dir_uuid  TEXT
+create table if not exists book_dir(
+	book_uuid	TEXT,
+	dir_uuid	TEXT,
+	PRIMARY KEY (book_uuid, dir_uuid),
+	FOREIGN KEY (book_uuid) REFERENCES book (uuid) ON DELETE CASCADE,
+	FOREIGN KEY (dir_uuid)	REFERENCES dir	(uuid) ON DELETE CASCADE
 );
 
--- name: create_subject_table!
-create table if not exists subject(
-  uuid		TEXT primary key,
-  parent_uuid	TEXT,
-  name 		TEXT
+
+-- name: create_container_table!
+create table if not exists container(
+  uuid	TEXT primary key,
+  name	TEXT,
+  desc	TEXT,
+  type	INTEGER
 );
 
--- name: create_book_subject_table!
-create table if not exists book_subject(
-  book_uuid    TEXT,
-  container_uuid TEXT
+-- name: create_book_container_table!
+create table if not exists book_container(
+	book_uuid		TEXT,
+	container_uuid	TEXT,
+	PRIMARY KEY (book_uuid, container_uuid),
+	FOREIGN KEY (book_uuid) REFERENCES book (uuid) ON DELETE CASCADE,
+	FOREIGN KEY (container_uuid) REFERENCES container (uuid) ON DELETE CASCADE
 );
 
--- name: create_publisher_table!
-create table if not exists publisher(
-  uuid	TEXT PRIMARY KEY,
-  name	TEXT
+-- name: create_container_link_table!
+create table if not exists container_link(
+  linker_uuid	TEXT,
+  linkee_uuid	TEXT,
+  PRIMARY KEY (linker_uuid, linkee_uuid),
+  FOREIGN KEY (linker_uuid) REFERENCES container (uuid) ON DELETE CASCADE,
+  FOREIGN KEY (linkee_uuid) REFERENCES container (uuid) ON DELETE CASCADE
 );
 
--- name: create_book_publisher_table!
-create table if not exists book_publisher(
-  book_uuid	TEXT,
-  container_uuid TEXT
+-- name: create_container_alias_table!
+create table if not exists container_alias(
+  name	TEXT primary key,
+  uuid	TEXT,
+	FOREIGN KEY (uuid) REFERENCES container (uuid) ON DELETE CASCADE
 );
-
--- name: create_language_table!
-create table if not exists language(
-  uuid		TEXT primary key,
-  name 		TEXT
-);
-
--- name: create_book_language_table!
-create table if not exists book_language(
-  book_uuid    TEXT,
-  container_uuid TEXT
-);
-

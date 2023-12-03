@@ -23,23 +23,25 @@ pub type Dirs = Vec<Dir>;
 pub type Subjects = Vec<Subject>;
 pub type Creators = Vec<Creator>;
 pub type Authors = Vec<Author>;
+pub type Strings = Vec<String>;
 
 stru!(Book {
   uuid:String,	ids:  IDs,		publisher:Publisher,
   desc:String,	len:  String,	subjects: Subjects,
   path:PathBuf,	publ: String,	creators: Creators,
   pos: String,	title:String,	contents: Contents,
-  dir: String, });
+  dir: String,
+});
 
-stru!(LibBook   {uuid:String,	title:String,	progress:u8,	});
-stru!(BookMData {desc:String,	pos:String,		contents:Contents,
-                publ:u32,		ids:IDs,});
-stru!(BookRel   {authors:Authors,subjects:Subjects,
-                publisher:Publisher,});
+stru!(LibBook   {uuid:String,		title:String,		progress:u8,	});
+stru!(BookMData {desc:String,		pos:String,			contents:Contents,publ:u32,		ids:IDs,});
+stru!(BookRel   {authors:Authors,	subjects:Subjects,	publisher:Publisher,});
 
-stru!(ParseBook{book:LibBook,	mdata:BookMData,authors:Vec<String>,
-  				name:String,	subjects:Vec<String>,
-				publisher:Vec<String>,});
+stru!(ParseBook{
+	book:LibBook,		mdata:BookMData,authors:Vec<String>,
+	name:String,		subjects:Strings,
+	publisher:Strings,	language:String,
+});
 
 stru!( Publisher {uuid:String,	name:String, 	});
 stru!( Subject   {uuid:String,	name:String, 	});
@@ -47,10 +49,13 @@ stru!( Author    {uuid:String,	name:String,    });
 stru!( Creator   {uuid:String,	name:String,	role:CreatorRole,});
 stru!( Nav       {name:String,	href:String,   	childs:Vec<Nav>,});
 
-stru!(Dir{	uuid:String,	name:String,   	parent:String,		});
+stru!(	Dir{	uuid:String,	name:String,   	parent:String,		});
 
 en!( CreatorRole {Author, Translator, Contributor, Narrator,	});
-en!( Container   {Folder, Creator, Subject, Publisher, Language,});
+#[derive(Copy, Clone)]
+pub enum Container {
+	Creator = 0,	Subject = 1,	Publisher = 2,	Language = 3
+}
 #[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
 pub enum Identifier {
 	ISBN(String), Asin(String), GOOG(String),

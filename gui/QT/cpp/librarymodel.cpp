@@ -23,8 +23,8 @@ QVariant LibraryModel::bookData(int row, int role) const {
     case UUID: 		return asQStr (book.uuid);
     case Name: 		return asQStr (book.title);
     case Path: 		return asQStr (get_book_path(library_uuid, book.uuid));
-	case IsContainer: return false;
-	case Progress: 	return book.progress;
+	  case IsContainer: return false;
+	  case Progress: 	return book.progress;
     case HasCover: 	return !book.cover_path.empty();
     case Cover: 	return asQStr (book.cover_path);
   }
@@ -35,9 +35,9 @@ QVariant LibraryModel::dirData(int row, int role) const {
   switch (role) {
     case UUID: 		return asQStr (dir.uuid);
     case Name: 		return asQStr (dir.name);
-	case IsContainer: return true;
+	  case IsContainer: return true;
     case Path: 		return "dir";
-	case Progress: 	return 0;
+	  case Progress: 	return 0;
     case HasCover: 	return !dir.cover_path.empty();
     case Cover: 	return asQStr (dir.cover_path);
   }
@@ -50,13 +50,14 @@ int LibraryModel::rowCount(const QModelIndex &parent) const {
 int LibraryModel::columnCount(const QModelIndex &parent) const { return 1; }
 
 QHash<int, QByteArray> LibraryModel::roleNames() const {
-  return {{UUID,     "uuid"},
-          {Name,     "name"},
-		  {Progress, "progress"},
-		  {Path,     "path"},
-		  {IsContainer, "isContainer"},
-          {HasCover, "hasCover"},
-          {Cover,    "cover"}};
+  return {
+    {UUID,     "uuid"},
+    {Name,     "name"},
+    {Progress, "progress"},
+    {Path,     "path"},
+    {IsContainer, "isContainer"},
+    {HasCover, "hasCover"},
+    {Cover,    "cover"}};
 }
 
 void LibraryModel::scanLibrary() {

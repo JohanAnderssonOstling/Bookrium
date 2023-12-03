@@ -6,9 +6,7 @@ use image::io::Reader;
 use iter_tools::{Either, Itertools};
 use lazy_static::lazy_static;
 
-lazy_static!(
-  static ref FILETYPES: HashSet<&'static str> = HashSet::from(["epub", "pdf"]);
-);
+lazy_static!(static ref FILETYPES: HashSet<&'static str> = HashSet::from(["epub"]););
 
 const THUMBNAIL_SIZES: [f32; 3] = [128.0, 256.0, 512.0];
 const HEIGHT_RATIO: f32 = 1.6;
@@ -32,14 +30,13 @@ pub fn scan_dir(path: &PathBuf) -> (Vec<PathBuf>, Vec<PathBuf>) {
 pub fn create_thumbnails(path: String, image_data: Vec<u8>){
 	if image_data.is_empty() {return;}
 	std::fs::create_dir_all(&path).unwrap();
-	println!("Creating thumbnails for {}", path);
 	let reader = match Reader::new(Cursor::new(&image_data)).with_guessed_format() {
-		Ok(reader) => reader,
-		Err(_) => {return;}
+		Ok(reader) 	=> reader,
+		Err(_) 		=> return,
 	};
 	let image = match reader.decode() {
-		Ok(image) => image,
-		Err(_) => {return;}
+		Ok(image) 	=> image,
+		Err(_) 		=> {return;}
 	};
 	for thumbnail_size in THUMBNAIL_SIZES.iter(){
 		let thumbnail_height = thumbnail_size * HEIGHT_RATIO.clone();

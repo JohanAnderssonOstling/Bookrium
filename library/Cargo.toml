@@ -8,19 +8,15 @@ edition = "2021"
 [dependencies]
 library_types = { path = "../library_types" }
 db_wrapper = { path = "../db_wrapper" }
-tokio = { version = "1.27.0", features = ["full"] }
 async-recursion = "1.0.4"
 lazy_static = "1.4.0"
-log = "0.4.14"
-rust-code-analysis = "0.0.25"
-rust-code-analysis-cli = "0.0.25"
+log = "0.4.20"
 rbook = "0.5.0"
 image = "0.24.6"
 pdf = "0.8.1"
 iter_tools = "0.1.4"
 uuid = "1.4.1"
 cxx = "1.0.83"
-html_parser = "0.7.0"
 
 [build-dependencies]
 cxx-build = "1.0.83"

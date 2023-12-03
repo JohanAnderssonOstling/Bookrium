@@ -23,8 +23,6 @@ qt_add_executable(Castafiore
         cpp/homemodel.h cpp/librarymodel.h cpp/rust_util.h
         qml/main.qml qml/HomeView.qml qml/HomeViewDelegate.qml
         qml/LibraryView.qml qml/LibraryViewDelegate.qml qml/PDFReader.qml qml/EpubReader.qml
-        cpp/epubmodel.h
-        cpp/epubmodel.cpp
         cpp/tocmodel.cpp
         cpp/tocmodel.h)
 

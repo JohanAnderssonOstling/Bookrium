@@ -1,7 +1,5 @@
-use std::fmt::{Error, format};
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::time::*;
 
 use db_wrapper::sqlitedb::librarydb::LibraryDBConn;
 use library_types::*;
@@ -31,10 +29,10 @@ impl LibraryModel {
 		}
 	}
 
-	pub fn get_books(&self, folder_uuid: &str) 	-> Books 	{ self.db.get_books(folder_uuid) }
-	pub fn get_book_path(&self, book_uuid: &str)-> String 	{ self.db.get_book_path(book_uuid, &self.path) }
-	pub fn get_book_toc(&self, book_uuid: &str) -> Contents { self.db.get_book_toc(book_uuid) }
-	pub fn get_dirs(&self, parent_uuid: &str) 	-> Dirs 	{ self.db.get_dirs(parent_uuid) }
+	pub fn get_books	(&self, folder_uuid: &str) 	-> Books 	{ self.db.get_books(folder_uuid) }
+	pub fn get_book_path(&self, book_uuid: &str)	-> String 	{ self.db.get_book_path(book_uuid, &self.path) }
+	pub fn get_book_toc	(&self, book_uuid: &str) 	-> Contents { self.db.get_book_toc(book_uuid) }
+	pub fn get_dirs		(&self, parent_uuid: &str) 	-> Dirs 	{ self.db.get_dirs(parent_uuid) }
 
 	pub fn delete_book(&self, book_uuid: &str) -> Result<(), std::io::Error> {
 		let book_path = self.get_book_path(book_uuid);

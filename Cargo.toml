@@ -4,5 +4,4 @@ members = [
     "client",
     "library",
     "library_types",
-    "db_wrapper",
 ]

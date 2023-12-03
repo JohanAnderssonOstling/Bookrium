@@ -1,10 +1,8 @@
-use std::fmt::format;
 use std::fs;
 use std::fs::OpenOptions;
-use std::path::{Path, PathBuf};
+use std::path::{PathBuf};
 use library_types::home_types::Library;
 use csv::*;
-use std::fs::*;
 
 const CSV_PATH: &str = "/home/johan/.local/share/media_library/home.csv";
 

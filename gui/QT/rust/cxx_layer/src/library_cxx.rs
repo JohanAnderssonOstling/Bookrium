@@ -1,7 +1,6 @@
 use lazy_static::lazy_static;
 use crate::library_cxx::library_ffi::*;
 use std::sync::Mutex;
-use std::path::Path;
 use library::library_model::LibraryModel;
 use std::collections::HashMap;
 lazy_static!(
@@ -75,7 +74,7 @@ fn delete_book(library_uuid: &str, book_uuid: &str) -> String {
 	let mut library_lock = LIBRARIES.lock().unwrap();
 	let library = library_lock.get_mut(library_uuid).unwrap();
 	match library.delete_book(book_uuid) {
-		Ok(_) => {},
+		Ok(_) => {"".into()},
 		Err(err) => {return format!{"Error deleting book: {}", err};}
 	}
 }
@@ -83,15 +82,15 @@ fn delete_book(library_uuid: &str, book_uuid: &str) -> String {
 fn delete_dir(library_uuid: &str, dir_uuid: &str) -> String {
 	let mut library_lock = LIBRARIES.lock().unwrap();
 	let library = library_lock.get_mut(library_uuid).unwrap();
-	library.delete_dir(dir_uuid)
+	match library.delete_dir(dir_uuid) {
+		Ok(_)	=> {"".into()},
+		Err(_)	=> {"Could not".into()},
+	}
 }
 
 #[cxx::bridge]
 mod library_ffi {
-    pub struct CXXBook {
-	pub uuid: String, pub title: String, pub progress: u8, pub cover_path: String,
-    }
-
+    pub struct CXXBook { pub uuid: String, pub title: String, pub progress: u8, pub cover_path: String, }
     pub struct Dir { pub uuid: String, pub name: String, pub cover_path: String, }
 	pub struct Nav { pub name: String, pub href: String, }
 
