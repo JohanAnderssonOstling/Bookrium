@@ -84,7 +84,7 @@ fn delete_dir(library_uuid: &str, dir_uuid: &str) -> String {
 	let library = library_lock.get_mut(library_uuid).unwrap();
 	match library.delete_dir(dir_uuid) {
 		Ok(_)	=> {"".into()},
-		Err(_)	=> {"Could not".into()},
+		Err(e)	=> {format!("Could not {e}").into()},
 	}
 }
 

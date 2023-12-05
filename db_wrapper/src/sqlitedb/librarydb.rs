@@ -1,3 +1,4 @@
+use std::fmt::format;
 use std::time::{SystemTime, UNIX_EPOCH};
 use library_types::*;
 use include_sqlite_sql::{include_sql, impl_sql};
@@ -19,12 +20,11 @@ impl LibraryDBConn {
 		Self { db: create_schema(db) }
 	}
 
+	// DIRS ----------------------------------------------------
 
 	pub fn insert_dir(&self, uuid: &str, path: &str, parent: &str) {
 		self.db.insert_dir(uuid, path, parent).unwrap();
 	}
-
-	// DIRS ----------------------------------------------------
 
 	pub fn get_dirs(&self, parent_dir_uuid: &str) -> Dirs {
 		let mut dirs: Vec<Dir> = Vec::new();
@@ -63,26 +63,19 @@ impl LibraryDBConn {
 		if self.db.insert_book_dir(book_uuid, dir_uuid).is_ok() {  }
 	}
 
-	pub fn delete_dir(&self, dir_uuid: &str) -> rusqlite::Result<usize, rusqlite::Error>{
-		self.db.delete_dir(dir_uuid)
+
+	pub fn delete_entry(&self, table_name:&str, uuid:&str) -> rusqlite::Result<usize, rusqlite::Error>{
+		let query = format!("DELETE FROM {table_name} WHERE uuid = ?");
+		self.db.execute(query.as_str(), params![uuid])
 	}
 
 	// BOOKS ---------------------------------------------------
 
-
-	pub fn get_book_uuid(&self, file_name: &str) -> Option<String> {
-		let mut uuid: Option<String> = None;
-		self.db.select_book_uuid(file_name, |row| {
-			uuid = Some(row.get(0).unwrap());
-			Ok(())
-		}).expect("get_book_uuid error");
-		uuid
-	}
-
 	pub fn insert_book(&self, parsed_book: ParseBook) {
 		let scan_time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
 		let book_uuid = parsed_book.book.uuid.as_str();
-		self.db.insert_book(
+		let book_name = &parsed_book.book.title;
+		let insert_result = self.db.insert_book(
 			book_uuid,
 			parsed_book.name.as_str(),
 			parsed_book.book.progress,
@@ -93,15 +86,15 @@ impl LibraryDBConn {
 			to_string(&parsed_book.mdata.ids).unwrap().as_str(),
 			parsed_book.mdata.publ,
 			scan_time,
-		).unwrap();
-		self.insert_containers("creator", 	book_uuid, parsed_book.authors, Container::Creator);
-		self.insert_containers("subject", 	book_uuid, parsed_book.subjects, Container::Subject);
-		self.insert_containers("publisher", book_uuid, parsed_book.publisher, Container::Publisher);
-		self.insert_containers("language", 	book_uuid, vec![parsed_book.language], Container::Language);
-	}
-
-	pub fn delete_book(&self, book_uuid: &str) -> rusqlite::Result<usize, rusqlite::Error>{
-		self.db.delete_book(book_uuid)
+		);
+		match insert_result {
+			Ok(_) => {},
+			Err(e) => {println!("Inserting book {book_name} with {book_uuid} failed {e}")},
+		}
+		self.insert_containers(book_uuid, parsed_book.authors, Container::Creator);
+		self.insert_containers(book_uuid, parsed_book.subjects, Container::Subject);
+		self.insert_containers(book_uuid, parsed_book.publisher, Container::Publisher);
+		self.insert_containers(book_uuid, vec![parsed_book.language], Container::Language);
 	}
 
 	pub fn get_book_path(&self, uuid: &str, library_path: &String) -> String {
@@ -116,15 +109,6 @@ impl LibraryDBConn {
 		}).expect("Error getting book file name");
 
 		format!("{}/{}/{}", library_path, dir_path, file_name).replace("/None", "").replace("//", "/")
-	}
-
-	pub fn book_exists(&self, uuid: &str) -> bool {
-		let mut exists: bool = false;
-		self.db.select_book(uuid, |_row| {
-			exists = true;
-			Ok(())
-		}).expect("Error getting media position");
-		exists
 	}
 
 	pub fn get_books(&self, dir_uuid: &str) -> Books {
@@ -162,13 +146,14 @@ impl LibraryDBConn {
 
 	// CONTAINERS --------------------------------------------------------------
 
-	fn insert_containers(&self, table_name:&str, book_uuid: &str, containers: Vec<String>, typ:Container) {
+	fn insert_containers(&self, book_uuid: &str, containers: Vec<String>, typ:Container) {
 		for container in containers {
 			let name = container.as_str();
-			let uuid = match self.get_entry_uuid("container", name) {
+			let uuid = match self.get_container_uuid(name, typ) {
 				Some(uuid) 	=> uuid,
 				None 		=> self.insert_container(name, typ)
 			};
+
 			self.insert_book_container( book_uuid, uuid.as_str());
 		}
 	}
@@ -182,20 +167,21 @@ impl LibraryDBConn {
 	}
 
 	fn insert_book_container(&self, book_uuid: &str, container_uuid: &str ){
-		let query		= format!("INSERT INTO book_container (book_uuid, container_uuid) VALUES (?,?)");
+		let query		= format!("INSERT OR IGNORE INTO book_container (book_uuid, container_uuid) VALUES (?,?)");
 		let mut stmt 	= self.db.prepare(query.as_str()).expect("{book_uuid}, {container_uuid}");
 		stmt.execute(params![book_uuid, container_uuid]).expect("{book_uuid}, {container_uuid}");
 	}
 
-	fn get_entries(&self, table_name:&str, parent:Option<&str>) {
-		if parent.is_none() {
-			let mut stmt = self.db.prepare("SELECT * FROM {table_name}");
-			
+	pub fn get_container_uuid(&self, entry_name: &str, container:Container) -> Option<String>{
+		let query		= format!("SELECT uuid FROM container WHERE name = ? AND type = ?");
+		let mut stmt 	= self.db.prepare(query.as_str()).unwrap();
+		match stmt.query_row(params![entry_name, container as u32], |row| row.get(0)) {
+			Ok(val) => Some(val),
+			Err(_) 	=> None, // Some other error
 		}
-
 	}
 
-	fn get_entry_uuid(&self, table_name: &str, entry_name: &str) -> Option<String>{
+	pub fn get_entry_uuid(&self, table_name: &str, entry_name: &str) -> Option<String>{
 		let query		= format!("SELECT uuid FROM {table_name} WHERE name = ?");
 		let mut stmt 	= self.db.prepare(query.as_str()).unwrap();
 		match stmt.query_row(params![entry_name], |row| row.get(0)) {
@@ -203,12 +189,14 @@ impl LibraryDBConn {
 			Err(_) 	=> None, // Some other error
 		}
 	}
-
-	/*fn delete_entry(&self, table_name:&str, uuid:&str) -> Result<usize> {
-		let query 		= format!("DELETE FROM {table_name} WHERE uuid = ?");
-		let mut stmt	= self.db.prepare(query.as_str()).unwrap();
-		stmt.execute(params![uuid])
-	}*/
+	pub fn entry_exists(&self, table_name:&str, uuid:&str) -> Option<String> {
+		let query = format!("SELECT uuid FROM {table_name} WHERE uuid = ?");
+		let mut stmt = self.db.prepare(query.as_str()).unwrap();
+		match stmt.query_row(params![uuid], |row| row.get(0)) {
+			Ok(val) => Some(val),
+			Err(_) => None,
+		}
+	}
 }
 
 

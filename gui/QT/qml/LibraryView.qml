@@ -47,31 +47,27 @@ ColumnLayout {
 				libraryModel.updateMediaFiles()
 			}
 		}
+		Button {
+			text: "Home"
+		}
+		Button {
+			text: "Books"
+		}
+		Button {
+			text: "Authors"
+		}
+		Button {
+			text: "Folders"
+		}
+		Button {
+			text: "Subjects"
+		}
+		Button {
+			text: "Publishers"
+		}
 	}
 
 	RowLayout {
-		Column {
-			Layout.alignment: Qt.AlignLeft
-			Layout.fillHeight: true
-			Button {
-				text: "Home"
-			}
-			Button {
-				text: "Books"
-			}
-			Button {
-				text: "Authors"
-			}
-			Button {
-				text: "Folders"
-			}
-			Button {
-				text: "Subjects"
-			}
-			Button {
-				text: "Publishers"
-			}
-		}
 		GridView {
 			id: 	libraryGrid
 			model: 	LibraryModel 	{id: libraryModel}

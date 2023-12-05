@@ -8,10 +8,10 @@ mod epub_parser;
 
 type Cover = Option<Vec<u8>>;
 
-pub fn parse_book (path: &Path, parent_uuid: &str) -> Option<(ParseBook, Cover)> {
+pub fn parse_book (path: &Path) -> Option<(ParseBook, Cover)> {
   let pat = path.to_str().unwrap();
   match path.extension().unwrap().to_str().unwrap() {
-    "pdf" 	=> 	parse_pdf(path, parent_uuid),
+    "pdf" 	=> 	parse_pdf(path),
     "epub" 	=> 	parse_epub(path),
     _ 		=> 	panic!("Unknown file type in file parser!"),
   }

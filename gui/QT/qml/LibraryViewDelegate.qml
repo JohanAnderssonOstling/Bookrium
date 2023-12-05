@@ -16,18 +16,8 @@ Column {
 		MenuItem {
 			text: "Delete"
 			onTriggered: {
-				if (isContainer){
-					const result = libraryModel.deleteDir(uuid);
-					if (result !== ""){
-						console.log("error deleting dir: " + result);
-					}
-				}
-				else{
-					const result = libraryModel.deleteBook(uuid);
-					if (result !== ""){
-						console.log("error deleting book: " + result);
-					}
-				}
+				if (isContainer && (result =libraryModel.deleteDir(uuid)) !== "") 	console.log("error deleting dir: " + result);
+				else if ((result = libraryModel.deleteBook(uuid)) !== "") 			console.log("error deleting book: " + result);
 			}
 		}
 	}
@@ -35,16 +25,16 @@ Column {
 		id: bookCoverContainer
 		width: coverWidth
 		height: coverHeight
-
+		//clip: true
 		Image {
 			id: bookCover
 			visible: hasCover
 			source: "file://" + cover
 			asynchronous: true
 			anchors.bottom: bookCoverContainer.bottom
-
+			anchors.fill: parent
 			//anchors.centerIn: parent
-
+			clip: true
 			Rectangle {
 				id: bookCoverFilter
 				anchors.fill: parent
