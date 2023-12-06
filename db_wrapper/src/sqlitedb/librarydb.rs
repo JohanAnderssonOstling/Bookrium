@@ -1,5 +1,5 @@
-use std::fmt::format;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::sync::mpsc::Receiver;
+use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use library_types::*;
 use include_sqlite_sql::{include_sql, impl_sql};
 use rusqlite::*;
@@ -19,6 +19,7 @@ impl LibraryDBConn {
 		let db = rusqlite::Connection::open(path).unwrap();
 		Self { db: create_schema(db) }
 	}
+
 
 	// DIRS ----------------------------------------------------
 
@@ -71,30 +72,15 @@ impl LibraryDBConn {
 
 	// BOOKS ---------------------------------------------------
 
-	pub fn insert_book(&self, parsed_book: ParseBook) {
-		let scan_time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
-		let book_uuid = parsed_book.book.uuid.as_str();
-		let book_name = &parsed_book.book.title;
-		let insert_result = self.db.insert_book(
-			book_uuid,
-			parsed_book.name.as_str(),
-			parsed_book.book.progress,
-			parsed_book.mdata.pos.as_str(),
-			to_string(&parsed_book.mdata.contents).unwrap().as_str(),
-			parsed_book.book.title.as_str(),
-			parsed_book.mdata.desc.as_str(),
-			to_string(&parsed_book.mdata.ids).unwrap().as_str(),
-			parsed_book.mdata.publ,
-			scan_time,
-		);
-		match insert_result {
-			Ok(_) => {},
-			Err(e) => {println!("Inserting book {book_name} with {book_uuid} failed {e}")},
+	pub fn insert_books (&mut self, book_receiver: Receiver<(ParseBook, String)>) {
+		let transaction = self.db.transaction().unwrap();
+
+		for parse_book in book_receiver {
+			let book_uuid = parse_book.0.book.uuid.clone();
+			insert_book(parse_book.0, &transaction);
+			insert_book_dir(book_uuid.as_str(), parse_book.1.as_str(), &transaction);
 		}
-		self.insert_containers(book_uuid, parsed_book.authors, Container::Creator);
-		self.insert_containers(book_uuid, parsed_book.subjects, Container::Subject);
-		self.insert_containers(book_uuid, parsed_book.publisher, Container::Publisher);
-		self.insert_containers(book_uuid, vec![parsed_book.language], Container::Language);
+		transaction.commit().unwrap();
 	}
 
 	pub fn get_book_path(&self, uuid: &str, library_path: &String) -> String {
@@ -112,12 +98,14 @@ impl LibraryDBConn {
 	}
 
 	pub fn get_books(&self, dir_uuid: &str) -> Books {
+		let book_time = Instant::now();
 		let mut books: Books = Vec::new();
 		self.db.get_books(dir_uuid, |row| {
 			let book = LibBook {uuid: row.get(0).unwrap(), title: row.get(1).unwrap(), progress: row.get(2).unwrap()};
 			books.push(book);
 			Ok(())
 		}).expect("Error getting media");
+		println!("Get books: {:?}, dir: {dir_uuid}", book_time.elapsed());
 		books
 	}
 
@@ -146,40 +134,7 @@ impl LibraryDBConn {
 
 	// CONTAINERS --------------------------------------------------------------
 
-	fn insert_containers(&self, book_uuid: &str, containers: Vec<String>, typ:Container) {
-		for container in containers {
-			let name = container.as_str();
-			let uuid = match self.get_container_uuid(name, typ) {
-				Some(uuid) 	=> uuid,
-				None 		=> self.insert_container(name, typ)
-			};
 
-			self.insert_book_container( book_uuid, uuid.as_str());
-		}
-	}
-
-	fn insert_container(&self, name: &str, container:Container) -> String {
-		let query 		= format!("INSERT OR IGNORE INTO container (uuid, name, type) VALUES (?,?,?)");
-		let uuid 		= uuid::Uuid::new_v4().to_string();
-		let mut stmt 	= self.db.prepare(query.as_str()).unwrap();
-		stmt.execute(params![uuid, name, container as u32]).unwrap();
-		uuid
-	}
-
-	fn insert_book_container(&self, book_uuid: &str, container_uuid: &str ){
-		let query		= format!("INSERT OR IGNORE INTO book_container (book_uuid, container_uuid) VALUES (?,?)");
-		let mut stmt 	= self.db.prepare(query.as_str()).expect("{book_uuid}, {container_uuid}");
-		stmt.execute(params![book_uuid, container_uuid]).expect("{book_uuid}, {container_uuid}");
-	}
-
-	pub fn get_container_uuid(&self, entry_name: &str, container:Container) -> Option<String>{
-		let query		= format!("SELECT uuid FROM container WHERE name = ? AND type = ?");
-		let mut stmt 	= self.db.prepare(query.as_str()).unwrap();
-		match stmt.query_row(params![entry_name, container as u32], |row| row.get(0)) {
-			Ok(val) => Some(val),
-			Err(_) 	=> None, // Some other error
-		}
-	}
 
 	pub fn get_entry_uuid(&self, table_name: &str, entry_name: &str) -> Option<String>{
 		let query		= format!("SELECT uuid FROM {table_name} WHERE name = ?");
@@ -196,6 +151,69 @@ impl LibraryDBConn {
 			Ok(val) => Some(val),
 			Err(_) => None,
 		}
+	}
+}
+
+pub fn insert_book_dir( book_uuid: &str, dir_uuid: &str, transaction: &Transaction) {
+	if transaction.insert_book_dir(book_uuid, dir_uuid).is_ok() {  }
+}
+
+fn insert_book(parsed_book: ParseBook, transaction: &Transaction) {
+	let before_book = Instant::now();
+	let scan_time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+	let book_uuid = parsed_book.book.uuid.as_str();
+	let book_name = &parsed_book.book.title;
+	let insert_result = transaction.insert_book(
+		book_uuid,
+		parsed_book.name.as_str(),
+		parsed_book.book.progress,
+		parsed_book.mdata.pos.as_str(),
+		to_string(&parsed_book.mdata.contents).unwrap().as_str(),
+		parsed_book.book.title.as_str(),
+		parsed_book.mdata.desc.as_str(),
+		to_string(&parsed_book.mdata.ids).unwrap().as_str(),
+		parsed_book.mdata.publ,
+		scan_time,
+	);
+	match insert_result {
+		Ok(_) => {},
+		Err(e) => {println!("Inserting book {book_name} with {book_uuid} failed {e}")},
+	}
+	insert_containers(book_uuid, parsed_book.authors, Container::Creator, transaction);
+	insert_containers(book_uuid, parsed_book.subjects, Container::Subject, transaction);
+	insert_containers(book_uuid, parsed_book.publisher, Container::Publisher, transaction);
+	insert_containers(book_uuid, vec![parsed_book.language], Container::Language, transaction);
+}
+
+fn insert_containers(book_uuid: &str, containers: Vec<String>, typ:Container, transaction: &Transaction) {
+	for container in containers {
+		let name = container.as_str();
+		let uuid = match get_container_uuid(name, typ, transaction) {
+			Some(uuid) 	=> uuid,
+			None 		=> insert_container(name, typ, transaction)
+		};
+
+		insert_book_container( book_uuid, uuid.as_str(), transaction);
+	}
+}
+
+fn insert_container(name: &str, container:Container, transaction: &Transaction) -> String {
+	let uuid 		= uuid::Uuid::new_v4().to_string();
+	let mut stmt 	= transaction.prepare("INSERT OR IGNORE INTO container (uuid, name, type) VALUES (?,?,?)").unwrap();
+	stmt.execute(params![uuid, name, container as u32]).unwrap();
+	uuid
+}
+
+fn insert_book_container(book_uuid: &str, container_uuid: &str, transaction: &Transaction){
+	let mut stmt 	= transaction.prepare("INSERT OR IGNORE INTO book_container (book_uuid, container_uuid) VALUES (?,?)").unwrap();
+	stmt.execute(params![book_uuid, container_uuid]).expect("{book_uuid}, {container_uuid}");
+}
+
+pub fn get_container_uuid(entry_name: &str, container:Container, transaction: &Transaction) -> Option<String>{
+	let mut stmt 	= transaction.prepare("SELECT uuid FROM container WHERE name = ? AND type = ?").unwrap();
+	match stmt.query_row(params![entry_name, container as u32], |row| row.get(0)) {
+		Ok(val) => Some(val),
+		Err(_) 	=> None, // Some other error
 	}
 }
 

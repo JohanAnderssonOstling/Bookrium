@@ -1,5 +1,7 @@
+use std::collections::LinkedList;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::sync::{Arc, Mutex};
 use std::sync::mpsc::{channel, Sender};
 use std::time::Instant;
 use threadpool::ThreadPool;
@@ -54,79 +56,83 @@ impl LibraryModel {
 		Ok(())
 	}
 
-	pub fn scan_lib(&self, path: &str) {
+	pub fn scan_lib(&mut self, path: &str) {
 		self.db.clear_dirs();
-		let (cover_sender, cover_receiver) = channel::<(String, Vec<u8>)>();
-		let (book_sender, book_receiver) = channel::<(PathBuf, String)>();
-		let (parse_book_sender, parse_book_receiver) = channel::<(ParseBook, String)>();
+		let (cover_sender, cover_receiver) 	= channel::<(String, Vec<u8>)>();
+		let (file_sender, file_receiver) 	= channel::<(PathBuf, String)>();
+		let (book_sender, book_receiver) 	= channel::<(ParseBook, String)>();
 		let pool = ThreadPool::new(8);
+		let book_pool = ThreadPool::new(16);//ThreadPool::new(8);
+		let cover_pool = pool.clone();
 		std::thread::spawn(move || {
+			let before_cover = Instant::now();
 			for item in cover_receiver {
-				let pool = pool.clone();
+				let pool = cover_pool.clone();
 				pool.execute(move || {
-					create_thumbnails(item.0, item.1);
+					create_thumbnails(item.0.clone(), item.1);
+					let path = item.0;
+					println!("Creating cover {path}, {:?}", before_cover.elapsed());
 				});
 			}
+
 		});
+
 		let meta_paths = self.meta_path.clone();
-		std::thread::spawn(move || {
-			let before_parse = Instant::now();
-			for file in book_receiver {
-				let parse_book_result = parse_book(&file.0);
-				if parse_book_result.is_none() {continue}
-				let (book, cover_option) = parse_book_result.unwrap();
-				let book_uuid = book.book.uuid.clone();
-				if let Some(cover) = cover_option {
-					let out_path = format!("{}/{}", meta_paths, book_uuid);
-					cover_sender.send((out_path, cover)).unwrap();
-				}
-				parse_book_sender.send((book, file.1)).unwrap();
-			}
-			let parse_duration = before_parse.elapsed();
-			println!("Parsing: {:?}", parse_duration);
-		});
 		let before_scan = Instant::now();
-		self.scan_lib_aux(PathBuf::from(path), "root", book_sender);
+		std::thread::spawn(move || {
+			for file in file_receiver {
+				let book_pool = book_pool.clone();
+				let cover_sender_clone = cover_sender.clone();
+				let book_sender_clone = book_sender.clone();
+				let meta_paths = meta_paths.clone();
+				book_pool.execute(move || {
+					let start_parse = Instant::now();
+					let parse_book_result = parse_book(&file.0);
+					if let Some((book, cover_option)) = parse_book_result {
+						let book_uuid = book.book.uuid.clone();
+						if let Some(cover) = cover_option {
+							let out_path = format!("{}/{}", meta_paths, book_uuid);
+							cover_sender_clone.send((out_path, cover)).unwrap();
+						}
+						book_sender_clone.send((book, file.1)).unwrap(); // Use the cloned sender
+						println!("Book delay {:?}, Parse delay: {:?}", before_scan.elapsed(), start_parse.elapsed());
+					}
+				});
+			}
+			println!("Parse: {:?}", before_scan.elapsed());
+		});
+		self.scan_lib_aux(PathBuf::from(path), "root", file_sender);
 		let scan_duration = before_scan.elapsed();
 		let before_insert = Instant::now();
-		for parse_book in parse_book_receiver {
-			let book_uuid = parse_book.0.book.uuid.clone();
-			self.db.insert_book(parse_book.0);
-			self.db.insert_book_dir(book_uuid.as_str(), parse_book.1.as_str());
-		}
+		self.db.insert_books(book_receiver);
 		let insert_duration = before_insert.elapsed();
 		println!("Scan: {:?}, Insert: {:?}", scan_duration, insert_duration);
 	}
 
 	fn scan_lib_aux(&self, scan_path: PathBuf, parent_uuid: &str, book_sender:Sender<(PathBuf, String)>){
 		let (dirs, files) = scan_dir(&scan_path);
-		//let before_files = Instant::now();
 		for file in files {
 			self.scan_book(file, parent_uuid, book_sender.clone());
 		}
-		//let file_duration = before_files.elapsed();
-
 		for dir in dirs {
-			//let before_dir = Instant::now();
 			let uuid = Uuid::new_v4().to_string();
 			let name = dir.file_name().unwrap().to_str().unwrap();
 			self.db.insert_dir(uuid.as_str(), name, parent_uuid);
-			//let dir_duration = before_dir.elapsed();
-			//println!("File: {:?}, Dir: {:?}", file_duration, dir_duration);
 			self.scan_lib_aux(dir, uuid.as_str(), book_sender.clone());
 		}
 	}
 
 	fn scan_book(&self, file: PathBuf, parent_uuid: &str, book_sender:Sender<(PathBuf, String)>){
 		let file_name 		= file.file_name().unwrap().to_str().unwrap();
-		let existing_uuid 	= self.db.get_entry_uuid("book", file_name);
+		/*let existing_uuid 	= self.db.get_entry_uuid("book", file_name);
 
-		if let Some(uuid) = existing_uuid.or_else(|| get_uuid(file.as_path())) {
+		if let Some(uuid) = existing_uuid//.or_else(|| get_uuid(file.as_path())) {
+		{
 			if self.db.entry_exists("book", &uuid).is_some() {
 				self.db.insert_book_dir(&uuid, parent_uuid);
 				return;
 			}
-		}
+		}*/
 		book_sender.send((file, parent_uuid.to_string())).unwrap();
 	}
 }

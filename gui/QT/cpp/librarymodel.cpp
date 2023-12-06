@@ -1,6 +1,6 @@
 #include "librarymodel.h"
 #include "rust_util.h"
-
+#include <QTime>
 LibraryModel::LibraryModel(QObject* parent) : QAbstractListModel(parent) {
 }
 
@@ -70,10 +70,16 @@ void LibraryModel::scanLibrary() {
 }
 
 void LibraryModel::updateMediaFiles() {
+	QTime timer;
+	auto time = QTime::currentTime(); // Start the timer
+
 	beginResetModel();
-	this->dirs	= get_dirs(library_uuid, dir_stack.top().uuid);
+	this->dirs = get_dirs(library_uuid, dir_stack.top().uuid);
 	this->books = get_media_files(library_uuid, dir_stack.top().uuid);
 	endResetModel();
+
+	//int elapsed = timer. // Get the elapsed time in milliseconds
+	//qDebug() << "updateMediaFiles took" << elapsed << "milliseconds";
 }
 
 void LibraryModel::setMediaPosition(const QString& uuid,

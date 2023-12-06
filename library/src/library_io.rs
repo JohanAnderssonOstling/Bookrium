@@ -15,6 +15,7 @@ const HEIGHT_RATIO: f32 = 1.6;
 fn is_valid(path: &PathBuf) -> bool {
 	if	path.file_name().unwrap().to_str().unwrap().starts_with('.') { return false; }
 	if	path.is_dir() { return true; }
+	if 	(path.extension().is_none()) {return false;}
 	let extension = path.extension().unwrap().to_str().unwrap();
 	FILETYPES.contains(extension)
 }
@@ -38,6 +39,7 @@ pub fn create_thumbnails(path: String, image_data: Vec<u8>){
 		Ok(image) 	=> image,
 		Err(_) 		=> {return;}
 	};
+	//image.save(format!("{path}/256.jpg")).unwrap();
 	for thumbnail_size in THUMBNAIL_SIZES.iter(){
 		let thumbnail_height = thumbnail_size * HEIGHT_RATIO.clone();
 		let thumbnail = image.thumbnail(thumbnail_size.clone() as u32, thumbnail_height as u32);
