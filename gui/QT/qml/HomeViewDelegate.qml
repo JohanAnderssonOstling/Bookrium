@@ -34,10 +34,14 @@ Column{
 		Image {
 		    source: "file://" + covers[0]
 		    anchors.bottom: parent.bottom
+			width:256
+			height:400
 		}
 		Image {
 		    source: "file://" + covers[1]
 		    anchors.bottom: parent.bottom
+			width:256
+			height:400
 		}
 	    }
 	}

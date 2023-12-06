@@ -26,13 +26,24 @@ Column {
 		width: coverWidth
 		height: coverHeight
 		//clip: true
+		MouseArea {
+			anchors.fill: parent
+			hoverEnabled: true
+			acceptedButtons: Qt.LeftButton | Qt.RightButton
+			onReleased: {
+				if (mouse.button === Qt.LeftButton) openMedia();
+				else libraryContextMenu.popup();
+			}
+
+			onEntered: hoverEnter()
+			onExited:  hoverExit()
+		}
 		Image {
 			id: bookCover
 			visible: hasCover
 			source: "file://" + cover
 			asynchronous: true
 			anchors.bottom: bookCoverContainer.bottom
-			anchors.fill: parent
 			//anchors.centerIn: parent
 			clip: true
 			Rectangle {
@@ -42,18 +53,7 @@ Column {
 				opacity: 0.25
 				border.color: "black"
 				border.width: 1
-				MouseArea {
-					anchors.fill: parent
-					hoverEnabled: true
-					acceptedButtons: Qt.LeftButton | Qt.RightButton
-					onReleased: {
-						if (mouse.button === Qt.LeftButton) openMedia();
-						else libraryContextMenu.popup();
-					}
 
-					onEntered: hoverEnter()
-					onExited:  hoverExit()
-				}
 			}
 		}
 		ProgressBar {
